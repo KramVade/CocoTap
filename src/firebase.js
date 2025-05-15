@@ -6,11 +6,11 @@ const firebaseConfig = {
     apiKey: "AIzaSyAz4Ii6pA4HsxbmffFAE3-5Kh8tTNz-sAs",
     authDomain: "cocotap-963b5.firebaseapp.com",
     projectId: "cocotap-963b5",
-    storageBucket: "cocotap-963b5.firebasestorage.app",
+    storageBucket: "cocotap-963b5.appspot.com",
     messagingSenderId: "1065918197117",
     appId: "1:1065918197117:web:f99657a44023211038f014",
     measurementId: "G-DFJK0T1S2T",
-    databaseURL: "https://cocotap-720fe-default-rtdb.firebaseio.com"
+    databaseURL: "https://cocotap-963b5-default-rtdb.firebaseio.com"
 };
 
 const app = initializeApp(firebaseConfig); 
