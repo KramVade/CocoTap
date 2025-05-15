@@ -162,361 +162,363 @@
 
       <!-- Main Content/Form Area -->
       <div class="main-content">
-        <!-- Tree 1 Container Status -->
-        <div v-if="currentView === 'tree1-container'" class="view-content">
-          <div class="view-header">
-            <h2>Tree 1 - Container Status</h2>
-          </div>
-          <div class="content-grid">
-            <!-- Container Visualization -->
-            <div class="visualization-card">
-              <h2>Container Status</h2>
-              <div class="bottle-container">
-                <div class="bottle">
-                  <div class="bottle-cap"></div>
-                  <div class="bottle-body">
-                    <div class="bottle-fill" :style="{ height: `${(tree1Level / containerCapacity) * 100}%` }">
-                      <div class="bubbles">
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                        <span></span>
+        <div class="main-content-inner">
+          <!-- Tree 1 Container Status -->
+          <div v-if="currentView === 'tree1-container'" class="view-content">
+            <div class="view-header">
+              <h2>Tree 1 - Container Status</h2>
+            </div>
+            <div class="content-grid">
+              <!-- Container Visualization -->
+              <div class="visualization-card">
+                <h2>Container Status</h2>
+                <div class="bottle-container">
+                  <div class="bottle">
+                    <div class="bottle-cap"></div>
+                    <div class="bottle-body">
+                      <div class="bottle-fill" :style="{ height: `${(tree1Level / containerCapacity) * 100}%` }">
+                        <div class="bubbles">
+                          <span></span>
+                          <span></span>
+                          <span></span>
+                          <span></span>
+                          <span></span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-                <div class="level-indicator">{{ tree1Level }}L</div>
-              </div>
-            </div>
-
-            <!-- Container Statistics -->
-            <div class="data-card">
-              <h2>Container Statistics</h2>
-              <div class="stats-grid">
-                <div class="stat-item">
-                  <span class="stat-label">Current Level</span>
-                  <span class="stat-value">{{ tree1Level }}L</span>
-                </div>
-                <div class="stat-item">
-                  <span class="stat-label">Maximum Capacity</span>
-                  <span class="stat-value">{{ containerCapacity }}L</span>
-                </div>
-                <div class="stat-item">
-                  <span class="stat-label">Fill Percentage</span>
-                  <span class="stat-value">{{ ((tree1Level / containerCapacity) * 100).toFixed(1) }}%</span>
-                </div>
-                <div class="stat-item">
-                  <span class="stat-label">Last Updated</span>
-                  <span class="stat-value">{{ tree1LastUpdated }}</span>
+                  <div class="level-indicator">{{ tree1Level }}L</div>
                 </div>
               </div>
-            </div>
 
-            <div class="chart-card">
-              <h2>Content Level History</h2>
-              <div class="chart-container">
-                <p class="placeholder">Historical Level Chart</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Tree 1 pH Status -->
-        <div v-if="currentView === 'tree1-ph'" class="view-content">
-          <div class="view-header">
-            <h2>Tree 1 - pH Status</h2>
-          </div>
-          <div class="content-grid">
-            <!-- pH Visualization -->
-            <div class="visualization-card">
-              <h2>Fermentation Status</h2>
-              <div class="ph-container">
-                <div class="ph-meter">
-                  <div class="ph-scale">
-                    <div class="ph-indicator" :style="{ left: `${((tree1PH - 2) / (5.75 - 2)) * 100}%` }">
-                      <div class="ph-value">pH {{ tree1PH }}</div>
-                    </div>
-                    <div class="ph-labels">
-                      <span>Vinegar (pH 2)</span>
-                      <span>Tuba (pH 5.75)</span>
-                    </div>
+              <!-- Container Statistics -->
+              <div class="data-card">
+                <h2>Container Statistics</h2>
+                <div class="stats-grid">
+                  <div class="stat-item">
+                    <span class="stat-label">Current Level</span>
+                    <span class="stat-value">{{ tree1Level }}L</span>
+                  </div>
+                  <div class="stat-item">
+                    <span class="stat-label">Maximum Capacity</span>
+                    <span class="stat-value">{{ containerCapacity }}L</span>
+                  </div>
+                  <div class="stat-item">
+                    <span class="stat-label">Fill Percentage</span>
+                    <span class="stat-value">{{ ((tree1Level / containerCapacity) * 100).toFixed(1) }}%</span>
+                  </div>
+                  <div class="stat-item">
+                    <span class="stat-label">Last Updated</span>
+                    <span class="stat-value">{{ tree1LastUpdated }}</span>
                   </div>
                 </div>
-                <div class="fermentation-status" :class="getTree1FermentationStatus().toLowerCase()">
-                  Current Status: {{ getTree1FermentationStatus() }}
-                </div>
               </div>
-            </div>
 
-            <!-- pH Statistics -->
-            <div class="data-card">
-              <h2>Fermentation Analysis</h2>
-              <div class="stats-grid">
-                <div class="stat-item">
-                  <span class="stat-label">Current pH</span>
-                  <span class="stat-value">{{ tree1PH }}</span>
+              <div class="chart-card">
+                <h2>Content Level History</h2>
+                <div class="chart-container">
+                  <p class="placeholder">Historical Level Chart</p>
                 </div>
-                <div class="stat-item">
-                  <span class="stat-label">Status</span>
-                  <span class="stat-value" :class="getTree1FermentationStatus().toLowerCase()">
-                    {{ getTree1FermentationStatus() }}
-                  </span>
-                </div>
-                <div class="stat-item">
-                  <span class="stat-label">Last Reading</span>
-                  <span class="stat-value">{{ tree1LastUpdated }}</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="chart-card">
-              <h2>pH Level History</h2>
-              <div class="chart-container">
-                <p class="placeholder">pH History Chart</p>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- Tree 2 Container Status -->
-        <div v-if="currentView === 'tree2-container'" class="view-content">
-          <div class="view-header">
-            <h2>Tree 2 - Container Status</h2>
-          </div>
-          <div class="content-grid">
-            <!-- Container Visualization -->
-            <div class="visualization-card">
-              <h2>Container Status</h2>
-              <div class="bottle-container">
-                <div class="bottle">
-                  <div class="bottle-cap"></div>
-                  <div class="bottle-body">
-                    <div class="bottle-fill" :style="{ height: `${(tree2Level / containerCapacity) * 100}%` }">
-                      <div class="bubbles">
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                        <span></span>
+          <!-- Tree 1 pH Status -->
+          <div v-if="currentView === 'tree1-ph'" class="view-content">
+            <div class="view-header">
+              <h2>Tree 1 - pH Status</h2>
+            </div>
+            <div class="content-grid">
+              <!-- pH Visualization -->
+              <div class="visualization-card">
+                <h2>Fermentation Status</h2>
+                <div class="ph-container">
+                  <div class="ph-meter">
+                    <div class="ph-scale">
+                      <div class="ph-indicator" :style="{ left: `${((tree1PH - 2) / (5.75 - 2)) * 100}%` }">
+                        <div class="ph-value">pH {{ tree1PH }}</div>
+                      </div>
+                      <div class="ph-labels">
+                        <span>Vinegar (pH 2)</span>
+                        <span>Tuba (pH 5.75)</span>
                       </div>
                     </div>
                   </div>
-                </div>
-                <div class="level-indicator">{{ tree2Level }}L</div>
-              </div>
-            </div>
-
-            <!-- Container Statistics -->
-            <div class="data-card">
-              <h2>Container Statistics</h2>
-              <div class="stats-grid">
-                <div class="stat-item">
-                  <span class="stat-label">Current Level</span>
-                  <span class="stat-value">{{ tree2Level }}L</span>
-                </div>
-                <div class="stat-item">
-                  <span class="stat-label">Maximum Capacity</span>
-                  <span class="stat-value">{{ containerCapacity }}L</span>
-                </div>
-                <div class="stat-item">
-                  <span class="stat-label">Fill Percentage</span>
-                  <span class="stat-value">{{ ((tree2Level / containerCapacity) * 100).toFixed(1) }}%</span>
-                </div>
-                <div class="stat-item">
-                  <span class="stat-label">Last Updated</span>
-                  <span class="stat-value">{{ tree2LastUpdated }}</span>
+                  <div class="fermentation-status" :class="getTree1FermentationStatus().toLowerCase()">
+                    Current Status: {{ getTree1FermentationStatus() }}
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div class="chart-card">
-              <h2>Content Level History</h2>
-              <div class="chart-container">
-                <p class="placeholder">Historical Level Chart</p>
+              <!-- pH Statistics -->
+              <div class="data-card">
+                <h2>Fermentation Analysis</h2>
+                <div class="stats-grid">
+                  <div class="stat-item">
+                    <span class="stat-label">Current pH</span>
+                    <span class="stat-value">{{ tree1PH }}</span>
+                  </div>
+                  <div class="stat-item">
+                    <span class="stat-label">Status</span>
+                    <span class="stat-value" :class="getTree1FermentationStatus().toLowerCase()">
+                      {{ getTree1FermentationStatus() }}
+                    </span>
+                  </div>
+                  <div class="stat-item">
+                    <span class="stat-label">Last Reading</span>
+                    <span class="stat-value">{{ tree1LastUpdated }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="chart-card">
+                <h2>pH Level History</h2>
+                <div class="chart-container">
+                  <p class="placeholder">pH History Chart</p>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- Tree 2 pH Status -->
-        <div v-if="currentView === 'tree2-ph'" class="view-content">
-          <div class="view-header">
-            <h2>Tree 2 - pH Status</h2>
-          </div>
-          <div class="content-grid">
-            <!-- pH Visualization -->
-            <div class="visualization-card">
-              <h2>Fermentation Status</h2>
-              <div class="ph-container">
-                <div class="ph-meter">
-                  <div class="ph-scale">
-                    <div class="ph-indicator" :style="{ left: `${((tree2PH - 2) / (5.75 - 2)) * 100}%` }">
-                      <div class="ph-value">pH {{ tree2PH }}</div>
+          <!-- Tree 2 Container Status -->
+          <div v-if="currentView === 'tree2-container'" class="view-content">
+            <div class="view-header">
+              <h2>Tree 2 - Container Status</h2>
+            </div>
+            <div class="content-grid">
+              <!-- Container Visualization -->
+              <div class="visualization-card">
+                <h2>Container Status</h2>
+                <div class="bottle-container">
+                  <div class="bottle">
+                    <div class="bottle-cap"></div>
+                    <div class="bottle-body">
+                      <div class="bottle-fill" :style="{ height: `${(tree2Level / containerCapacity) * 100}%` }">
+                        <div class="bubbles">
+                          <span></span>
+                          <span></span>
+                          <span></span>
+                          <span></span>
+                          <span></span>
+                        </div>
+                      </div>
                     </div>
-                    <div class="ph-labels">
-                      <span>Vinegar (pH 2)</span>
-                      <span>Tuba (pH 5.75)</span>
+                  </div>
+                  <div class="level-indicator">{{ tree2Level }}L</div>
+                </div>
+              </div>
+
+              <!-- Container Statistics -->
+              <div class="data-card">
+                <h2>Container Statistics</h2>
+                <div class="stats-grid">
+                  <div class="stat-item">
+                    <span class="stat-label">Current Level</span>
+                    <span class="stat-value">{{ tree2Level }}L</span>
+                  </div>
+                  <div class="stat-item">
+                    <span class="stat-label">Maximum Capacity</span>
+                    <span class="stat-value">{{ containerCapacity }}L</span>
+                  </div>
+                  <div class="stat-item">
+                    <span class="stat-label">Fill Percentage</span>
+                    <span class="stat-value">{{ ((tree2Level / containerCapacity) * 100).toFixed(1) }}%</span>
+                  </div>
+                  <div class="stat-item">
+                    <span class="stat-label">Last Updated</span>
+                    <span class="stat-value">{{ tree2LastUpdated }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="chart-card">
+                <h2>Content Level History</h2>
+                <div class="chart-container">
+                  <p class="placeholder">Historical Level Chart</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tree 2 pH Status -->
+          <div v-if="currentView === 'tree2-ph'" class="view-content">
+            <div class="view-header">
+              <h2>Tree 2 - pH Status</h2>
+            </div>
+            <div class="content-grid">
+              <!-- pH Visualization -->
+              <div class="visualization-card">
+                <h2>Fermentation Status</h2>
+                <div class="ph-container">
+                  <div class="ph-meter">
+                    <div class="ph-scale">
+                      <div class="ph-indicator" :style="{ left: `${((tree2PH - 2) / (5.75 - 2)) * 100}%` }">
+                        <div class="ph-value">pH {{ tree2PH }}</div>
+                      </div>
+                      <div class="ph-labels">
+                        <span>Vinegar (pH 2)</span>
+                        <span>Tuba (pH 5.75)</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div class="fermentation-status" :class="getTree2FermentationStatus().toLowerCase()">
-                  Current Status: {{ getTree2FermentationStatus() }}
-                </div>
-              </div>
-            </div>
-
-            <!-- pH Statistics -->
-            <div class="data-card">
-              <h2>Fermentation Analysis</h2>
-              <div class="stats-grid">
-                <div class="stat-item">
-                  <span class="stat-label">Current pH</span>
-                  <span class="stat-value">{{ tree2PH }}</span>
-                </div>
-                <div class="stat-item">
-                  <span class="stat-label">Status</span>
-                  <span class="stat-value" :class="getTree2FermentationStatus().toLowerCase()">
-                    {{ getTree2FermentationStatus() }}
-                  </span>
-                </div>
-                <div class="stat-item">
-                  <span class="stat-label">Last Reading</span>
-                  <span class="stat-value">{{ tree2LastUpdated }}</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="chart-card">
-              <h2>pH Level History</h2>
-              <div class="chart-container">
-                <p class="placeholder">pH History Chart</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Temperature View for Bottle 1 -->
-        <div v-if="currentView === 'tree1-temp'" class="view-content">
-          <div class="view-header">
-            <h2>Bottle 1 - Temperature</h2>
-          </div>
-          <div class="content-grid">
-            <!-- Temperature Visualization -->
-            <div class="visualization-card">
-              <h2>Temperature Status</h2>
-              <div class="temperature-container">
-                <div class="thermometer">
-                  <div class="thermometer-body">
-                    <div 
-                      class="temperature-fill" 
-                      :style="{ 
-                        height: `${((tree1Temp - 20) / (35 - 20)) * 100}%`,
-                        backgroundColor: getTemperatureColor(tree1Temp)
-                      }"
-                    ></div>
+                  <div class="fermentation-status" :class="getTree2FermentationStatus().toLowerCase()">
+                    Current Status: {{ getTree2FermentationStatus() }}
                   </div>
-                  <div class="temperature-value">{{ tree1Temp }}°C</div>
-                </div>
-                <div class="temperature-scale">
-                  <span>35°C</span>
-                  <span>20°C</span>
                 </div>
               </div>
-            </div>
 
-            <!-- Temperature Statistics -->
-            <div class="data-card">
-              <h2>Temperature Analysis</h2>
-              <div class="stats-grid">
-                <div class="stat-item">
-                  <span class="stat-label">Current Temperature</span>
-                  <span class="stat-value">{{ tree1Temp }}°C</span>
-                </div>
-                <div class="stat-item">
-                  <span class="stat-label">Status</span>
-                  <span class="stat-value" :class="getTemperatureStatus(tree1Temp).toLowerCase()">
-                    {{ getTemperatureStatus(tree1Temp) }}
-                  </span>
-                </div>
-                <div class="stat-item">
-                  <span class="stat-label">Optimal Range</span>
-                  <span class="stat-value">25°C - 30°C</span>
-                </div>
-                <div class="stat-item">
-                  <span class="stat-label">Last Updated</span>
-                  <span class="stat-value">{{ tree1LastUpdated }}</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="chart-card">
-              <h2>Temperature History</h2>
-              <div class="chart-container">
-                <p class="placeholder">Temperature History Chart</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Temperature View for Bottle 2 -->
-        <div v-if="currentView === 'tree2-temp'" class="view-content">
-          <div class="header">
-            <h1>Bottle 2 - Temperature</h1>
-          </div>
-          <div class="content-grid">
-            <!-- Temperature Visualization -->
-            <div class="visualization-card">
-              <h2>Temperature Status</h2>
-              <div class="temperature-container">
-                <div class="thermometer">
-                  <div class="thermometer-body">
-                    <div 
-                      class="temperature-fill" 
-                      :style="{ 
-                        height: `${((tree2Temp - 20) / (35 - 20)) * 100}%`,
-                        backgroundColor: getTemperatureColor(tree2Temp)
-                      }"
-                    ></div>
+              <!-- pH Statistics -->
+              <div class="data-card">
+                <h2>Fermentation Analysis</h2>
+                <div class="stats-grid">
+                  <div class="stat-item">
+                    <span class="stat-label">Current pH</span>
+                    <span class="stat-value">{{ tree2PH }}</span>
                   </div>
-                  <div class="temperature-value">{{ tree2Temp }}°C</div>
+                  <div class="stat-item">
+                    <span class="stat-label">Status</span>
+                    <span class="stat-value" :class="getTree2FermentationStatus().toLowerCase()">
+                      {{ getTree2FermentationStatus() }}
+                    </span>
+                  </div>
+                  <div class="stat-item">
+                    <span class="stat-label">Last Reading</span>
+                    <span class="stat-value">{{ tree2LastUpdated }}</span>
+                  </div>
                 </div>
-                <div class="temperature-scale">
-                  <span>35°C</span>
-                  <span>20°C</span>
+              </div>
+
+              <div class="chart-card">
+                <h2>pH Level History</h2>
+                <div class="chart-container">
+                  <p class="placeholder">pH History Chart</p>
                 </div>
               </div>
             </div>
+          </div>
 
-            <!-- Temperature Statistics -->
-            <div class="data-card">
-              <h2>Temperature Analysis</h2>
-              <div class="stats-grid">
-                <div class="stat-item">
-                  <span class="stat-label">Current Temperature</span>
-                  <span class="stat-value">{{ tree2Temp }}°C</span>
+          <!-- Temperature View for Bottle 1 -->
+          <div v-if="currentView === 'tree1-temp'" class="view-content">
+            <div class="view-header">
+              <h2>Bottle 1 - Temperature</h2>
+            </div>
+            <div class="content-grid">
+              <!-- Temperature Visualization -->
+              <div class="visualization-card">
+                <h2>Temperature Status</h2>
+                <div class="temperature-container">
+                  <div class="thermometer">
+                    <div class="thermometer-body">
+                      <div 
+                        class="temperature-fill" 
+                        :style="{ 
+                          height: `${((tree1Temp - 20) / (35 - 20)) * 100}%`,
+                          backgroundColor: getTemperatureColor(tree1Temp)
+                        }"
+                      ></div>
+                    </div>
+                    <div class="temperature-value">{{ tree1Temp }}°C</div>
+                  </div>
+                  <div class="temperature-scale">
+                    <span>35°C</span>
+                    <span>20°C</span>
+                  </div>
                 </div>
-                <div class="stat-item">
-                  <span class="stat-label">Status</span>
-                  <span class="stat-value" :class="getTemperatureStatus(tree2Temp).toLowerCase()">
-                    {{ getTemperatureStatus(tree2Temp) }}
-                  </span>
+              </div>
+
+              <!-- Temperature Statistics -->
+              <div class="data-card">
+                <h2>Temperature Analysis</h2>
+                <div class="stats-grid">
+                  <div class="stat-item">
+                    <span class="stat-label">Current Temperature</span>
+                    <span class="stat-value">{{ tree1Temp }}°C</span>
+                  </div>
+                  <div class="stat-item">
+                    <span class="stat-label">Status</span>
+                    <span class="stat-value" :class="getTemperatureStatus(tree1Temp).toLowerCase()">
+                      {{ getTemperatureStatus(tree1Temp) }}
+                    </span>
+                  </div>
+                  <div class="stat-item">
+                    <span class="stat-label">Optimal Range</span>
+                    <span class="stat-value">25°C - 30°C</span>
+                  </div>
+                  <div class="stat-item">
+                    <span class="stat-label">Last Updated</span>
+                    <span class="stat-value">{{ tree1LastUpdated }}</span>
+                  </div>
                 </div>
-                <div class="stat-item">
-                  <span class="stat-label">Optimal Range</span>
-                  <span class="stat-value">25°C - 30°C</span>
-                </div>
-                <div class="stat-item">
-                  <span class="stat-label">Last Updated</span>
-                  <span class="stat-value">{{ tree2LastUpdated }}</span>
+              </div>
+
+              <div class="chart-card">
+                <h2>Temperature History</h2>
+                <div class="chart-container">
+                  <p class="placeholder">Temperature History Chart</p>
                 </div>
               </div>
             </div>
+          </div>
 
-            <div class="chart-card">
-              <h2>Temperature History</h2>
-              <div class="chart-container">
-                <p class="placeholder">Temperature History Chart</p>
+          <!-- Temperature View for Bottle 2 -->
+          <div v-if="currentView === 'tree2-temp'" class="view-content">
+            <div class="header">
+              <h1>Bottle 2 - Temperature</h1>
+            </div>
+            <div class="content-grid">
+              <!-- Temperature Visualization -->
+              <div class="visualization-card">
+                <h2>Temperature Status</h2>
+                <div class="temperature-container">
+                  <div class="thermometer">
+                    <div class="thermometer-body">
+                      <div 
+                        class="temperature-fill" 
+                        :style="{ 
+                          height: `${((tree2Temp - 20) / (35 - 20)) * 100}%`,
+                          backgroundColor: getTemperatureColor(tree2Temp)
+                        }"
+                      ></div>
+                    </div>
+                    <div class="temperature-value">{{ tree2Temp }}°C</div>
+                  </div>
+                  <div class="temperature-scale">
+                    <span>35°C</span>
+                    <span>20°C</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Temperature Statistics -->
+              <div class="data-card">
+                <h2>Temperature Analysis</h2>
+                <div class="stats-grid">
+                  <div class="stat-item">
+                    <span class="stat-label">Current Temperature</span>
+                    <span class="stat-value">{{ tree2Temp }}°C</span>
+                  </div>
+                  <div class="stat-item">
+                    <span class="stat-label">Status</span>
+                    <span class="stat-value" :class="getTemperatureStatus(tree2Temp).toLowerCase()">
+                      {{ getTemperatureStatus(tree2Temp) }}
+                    </span>
+                  </div>
+                  <div class="stat-item">
+                    <span class="stat-label">Optimal Range</span>
+                    <span class="stat-value">25°C - 30°C</span>
+                  </div>
+                  <div class="stat-item">
+                    <span class="stat-label">Last Updated</span>
+                    <span class="stat-value">{{ tree2LastUpdated }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="chart-card">
+                <h2>Temperature History</h2>
+                <div class="chart-container">
+                  <p class="placeholder">Temperature History Chart</p>
+                </div>
               </div>
             </div>
           </div>
@@ -637,6 +639,15 @@
   padding: 20px;
   background-color: #f5f7fa;
   min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.main-content-inner {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 /* Navigation styles */
@@ -1457,6 +1468,20 @@
   background: rgba(0,0,0,0.3);
   z-index: 1099;
   display: block;
+}
+
+@media (max-width: 1200px) {
+  .main-content-inner {
+    max-width: 100%;
+    padding: 0 10px;
+  }
+}
+
+@media (max-width: 900px) {
+  .content-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
 }
 </style>
 
