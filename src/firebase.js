@@ -1,6 +1,7 @@
 import { initializeApp } from 'firebase/app'; 
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth'; 
 import { getDatabase, ref, set, onValue, push } from 'firebase/database';
+import { VueFire, useFirestore, useDatabase } from 'vuefire';
 
 const firebaseConfig = {
     apiKey: "AIzaSyAz4Ii6pA4HsxbmffFAE3-5Kh8tTNz-sAs",
@@ -19,6 +20,7 @@ const provider = new GoogleAuthProvider();
 const database = getDatabase(app);
 
 export { 
+    app,
     auth, 
     provider, 
     signInWithPopup, 
@@ -28,5 +30,7 @@ export {
     ref,
     set,
     onValue,
-    push
+    push,
+    VueFire,
+    useDatabase
 }; 
