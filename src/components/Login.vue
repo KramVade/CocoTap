@@ -33,14 +33,17 @@ export default {
   },
   methods: {
     async login() {
-      try {
-        const result = await signInWithPopup(auth, provider);
-        this.user = result.user;
-        this.$router.push('/dashboard');
-      } catch (error) {
-        console.error('Login error:', error);
-      }
-    },
+  try {
+    console.log("Starting sign-in...");
+    const result = await signInWithPopup(auth, provider);
+    console.log("Login result:", result);
+    this.user = result.user;
+    this.$router.push('/dashboard');
+  } catch (error) {
+    console.error('Login error:', error.code, error.message);
+  }
+}
+,
     async logout() {
       try {
         await signOut(auth);
