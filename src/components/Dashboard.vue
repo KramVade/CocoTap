@@ -2,6 +2,9 @@
   <div class="dashboard-container">
     <!-- Header -->
     <div class="main-header">
+      <button class="menu-toggle" @click="toggleSidebar">
+        <span class="hamburger-icon">☰</span>
+      </button>
       <h1 class="app-title">CocoTap</h1>
       <p class="app-subtitle">Tuba Production Monitoring System</p>
       
@@ -54,7 +57,7 @@
 
     <div class="content-wrapper">
       <!-- Navigation Sidebar -->
-      <div class="sidebar">
+      <div class="sidebar" :class="{ show: showSidebar }">
         <div class="nav-header">
           <h2>Menu</h2>
         </div>
@@ -574,6 +577,25 @@
   align-items: center;
 }
 
+.menu-toggle {
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: var(--color-darkest);
+  display: none;
+  padding: 8px;
+  z-index: 1001;
+}
+
+.hamburger-icon {
+  display: block;
+}
+
 .app-title {
   font-size: 2.5em;
   color: var(--color-darkest);
@@ -669,9 +691,18 @@
 
 /* Responsive design */
 @media (max-width: 768px) {
+  .menu-toggle {
+    display: block;
+  }
+
   .sidebar {
     transform: translateX(-100%);
     transition: transform 0.3s ease;
+    z-index: 999;
+  }
+  
+  .sidebar.show {
+    transform: translateX(0);
   }
   
   .main-content {
@@ -1432,6 +1463,7 @@ export default {
       showProfileMenu: false,
       user: null, // Will store Firebase user data
       isLoading: false,
+      showSidebar: false,
     }
   },
   methods: {
@@ -1574,7 +1606,14 @@ export default {
           document.body.removeChild(notification);
         }, 300);
       }, 3000);
-    }
+    },
+    toggleSidebar() {
+      this.showSidebar = !this.showSidebar;
+      const sidebar = document.querySelector('.sidebar');
+      if (sidebar) {
+        sidebar.classList.toggle('show');
+      }
+    },
   },
   mounted() {
     setInterval(() => {
