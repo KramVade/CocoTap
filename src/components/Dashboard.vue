@@ -56,7 +56,7 @@
       <!-- Navigation Sidebar -->
       <div class="sidebar">
         <div class="nav-header">
-          <h2>Navigation</h2>
+          <h2>Menu</h2>
         </div>
         <div class="nav-items">
           <!-- Container Status Group -->

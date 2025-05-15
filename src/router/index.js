@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Dashboard from '../components/Dashboard.vue';
 import Login from '../components/Login.vue';
+import SensorData from '../components/SensorData.vue';
 
 const routes = [
   {
@@ -12,6 +13,11 @@ const routes = [
     path: '/dashboard',
     name: 'Dashboard',
     component: Dashboard
+  },
+  {
+    path: '/sensors',
+    name: 'SensorData',
+    component: SensorData
   }
 ];
 
