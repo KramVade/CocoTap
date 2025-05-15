@@ -77,7 +77,7 @@
               <div 
                 class="nav-item" 
                 :class="{ active: currentView === 'tree1-container' }"
-                @click="currentView = 'tree1-container'"
+                @click="selectView('tree1-container')"
               >
                 <span class="nav-icon">🌴</span>
                 Tree 1
@@ -85,7 +85,7 @@
               <div 
                 class="nav-item" 
                 :class="{ active: currentView === 'tree2-container' }"
-                @click="currentView = 'tree2-container'"
+                @click="selectView('tree2-container')"
               >
                 <span class="nav-icon">🌴</span>
                 Tree 2
@@ -156,6 +156,9 @@
           </div>
         </div>
       </div>
+
+      <!-- Sidebar overlay for mobile -->
+      <div class="sidebar-overlay" v-if="showSidebar" @click="toggleSidebar"></div>
 
       <!-- Main Content/Form Area -->
       <div class="main-content">
@@ -625,6 +628,7 @@
   border-top-right-radius: 10px;
   border-top-left-radius: 10px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 1100;
 }
 
 .main-content {
@@ -698,7 +702,10 @@
   .sidebar {
     transform: translateX(-100%);
     transition: transform 0.3s ease;
-    z-index: 999;
+    z-index: 1100;
+    top: 0;
+    height: 100vh;
+    border-radius: 0 10px 10px 0;
   }
   
   .sidebar.show {
@@ -707,6 +714,10 @@
   
   .main-content {
     margin-left: 0;
+  }
+
+  .sidebar-overlay {
+    display: block;
   }
 
   .app-title {
@@ -1436,6 +1447,17 @@
     background-position: 0% 50%;
   }
 }
+
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.3);
+  z-index: 1099;
+  display: block;
+}
 </style>
 
 <script>
@@ -1476,6 +1498,13 @@ export default {
         this.currentView = 'tree1-ph';
       } else if (group === 'temperature') {
         this.currentView = 'tree1-temp';
+      }
+    },
+    selectView(view) {
+      this.currentView = view;
+      // Auto-close sidebar on mobile
+      if (window.innerWidth <= 768) {
+        this.showSidebar = false;
       }
     },
     getTree1FermentationStatus() {
