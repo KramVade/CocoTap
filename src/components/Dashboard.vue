@@ -646,8 +646,9 @@
 
 .main-content-inner {
   width: 100%;
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
+  padding: 0 24px;
 }
 
 /* Navigation styles */
@@ -761,8 +762,8 @@
 .content-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 30px;
-  padding: 20px 0;
+  gap: 40px;
+  padding: 32px 0;
 }
 
 .chart-card {
@@ -772,8 +773,9 @@
 .visualization-card, .data-card, .chart-card {
   background: white;
   border-radius: 10px;
-  padding: 30px;
+  padding: 40px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  min-width: 320px;
 }
 
 .bottle-container {
@@ -1470,10 +1472,9 @@
   display: block;
 }
 
-@media (max-width: 1200px) {
-  .main-content-inner {
-    max-width: 100%;
-    padding: 0 10px;
+@media (min-width: 1400px) {
+  .content-grid {
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
@@ -1481,6 +1482,10 @@
   .content-grid {
     grid-template-columns: 1fr;
     gap: 20px;
+    padding: 16px 0;
+  }
+  .visualization-card, .data-card, .chart-card {
+    padding: 20px;
   }
 }
 </style>
