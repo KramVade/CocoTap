@@ -1,6 +1,7 @@
 import { initializeApp } from 'firebase/app'; 
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth'; 
 import { getDatabase, ref, set, onValue, push } from 'firebase/database';
+import { getFirestore, collection, doc, getDoc, getDocs, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { VueFire, useFirestore, useDatabase } from 'vuefire';
 
 const firebaseConfig = {
@@ -18,6 +19,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app); 
 const provider = new GoogleAuthProvider();
 const database = getDatabase(app);
+const firestore = getFirestore(app);
 
 export { 
     app,
@@ -32,5 +34,13 @@ export {
     onValue,
     push,
     VueFire,
-    useDatabase
-}; 
+    useDatabase,
+    firestore,
+    collection,
+    doc,
+    getDoc,
+    getDocs,
+    onSnapshot,
+    query,
+    orderBy
+};
