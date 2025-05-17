@@ -446,7 +446,7 @@
                   </div>
                   <div class="stat-item">
                     <span class="stat-label">Last Updated</span>
-                    <span class="stat-value">{{ tree1LastUpdated }}</span>
+                    <span class="stat-value">{{ lastTemperatureReading ? formatDate(lastTemperatureReading.timestamp) : 'N/A' }}</span>
                   </div>
                 </div>
               </div>
@@ -1488,6 +1488,13 @@
     padding: 20px;
   }
 }
+
+/* Remove sensor status styles */
+.stat-value.online,
+.stat-value.warning,
+.stat-value.offline {
+  display: none;
+}
 </style>
 
 <script>
@@ -1503,7 +1510,8 @@ import {
   onSnapshot,
   getDocs,
   doc,
-  setDoc
+  setDoc,
+  limit
 } from '../firebase';
 
 export default {
@@ -1524,6 +1532,9 @@ export default {
       // Add temperature data
       tree1Temp: 25,
       tree2Temp: 25,
+      // Add temperature sensor data
+      temperatureReadings: [],
+      lastTemperatureReading: null,
       showLogoutModal: false,
       showProfileMenu: false,
       user: null,
@@ -1740,7 +1751,8 @@ export default {
         month: 'short',
         day: 'numeric',
         hour: '2-digit',
-        minute: '2-digit'
+        minute: '2-digit',
+        second: '2-digit'
       });
     },
     getTimestampValue(timestamp) {
@@ -1774,24 +1786,47 @@ export default {
         console.error(`Error getting ${collectionName} collection:`, error);
       });
     });
-    
-    // Listen for Tree 1 sensor data
-    const tree1Query = query(collection(firestore, "sensor"));
-    this.tree1Unsubscribe = onSnapshot(tree1Query, (snapshot) => {
-      // Get all documents and find the latest one
-      const docs = snapshot.docs.map(doc => doc.data());
-      const latest = docs.reduce((latest, current) => {
-        const currentTime = this.getTimestampValue(current.timestamp);
-        const latestTime = this.getTimestampValue(latest?.timestamp);
-        return currentTime > latestTime ? current : latest;
-      }, null);
 
-      console.log('Tree 1 latest data:', latest);
-      if (latest) {
+    // Listen for temperature sensor readings from the temp_sensor collection
+    const tempQuery = query(
+      collection(firestore, "temp_sensor"),
+      orderBy("timestamp", "desc")
+    );
+    
+    this.tempUnsubscribe = onSnapshot(tempQuery, (snapshot) => {
+      if (!snapshot.empty) {
+        const latest = snapshot.docs[0].data();
+        console.log('New temperature reading received:', latest);
+        
+        this.lastTemperatureReading = {
+          temperature: latest.temperature_celsius,
+          timestamp: latest.timestamp
+        };
+        // Update both tree temperatures with the latest reading
+        this.tree1Temp = this.lastTemperatureReading.temperature;
+        this.tree2Temp = this.lastTemperatureReading.temperature;
+        console.log('Updated temperature to:', this.tree1Temp, 'at', this.formatDate(latest.timestamp));
+      }
+    }, (error) => {
+      console.error('Error fetching temperature data:', error);
+    });
+
+    // Listen for Tree 1 sensor data
+    const tree1Query = query(
+      collection(firestore, "sensor"),
+      orderBy("timestamp", "desc")
+    );
+    
+    this.tree1Unsubscribe = onSnapshot(tree1Query, (snapshot) => {
+      if (!snapshot.empty) {
+        const docs = snapshot.docs.map(doc => doc.data());
+        const latest = docs[0]; // Most recent reading
+        console.log('Tree 1 new data received:', latest);
+        
         this.updateTree1(
           latest.volume_liters,
           latest.ph,
-          latest.temperature
+          latest.temperature_celsius
         );
         this.tree1LastUpdated = this.formatDate(latest.timestamp);
         console.log('Updated Tree 1 timestamp:', this.tree1LastUpdated);
@@ -1801,18 +1836,17 @@ export default {
     });
 
     // Listen for Tree 2 sensor data
-    const tree2Query = query(collection(firestore, "sensor2"));
+    const tree2Query = query(
+      collection(firestore, "sensor2"),
+      orderBy("timestamp", "desc")
+    );
+    
     this.tree2Unsubscribe = onSnapshot(tree2Query, (snapshot) => {
-      // Get all documents and find the latest one
-      const docs = snapshot.docs.map(doc => doc.data());
-      const latest = docs.reduce((latest, current) => {
-        const currentTime = this.getTimestampValue(current.timestamp);
-        const latestTime = this.getTimestampValue(latest?.timestamp);
-        return currentTime > latestTime ? current : latest;
-      }, null);
-
-      console.log('Tree 2 latest data:', latest);
-      if (latest) {
+      if (!snapshot.empty) {
+        const docs = snapshot.docs.map(doc => doc.data());
+        const latest = docs[0]; // Most recent reading
+        console.log('Tree 2 new data received:', latest);
+        
         this.updateTree2(
           latest.volume_liters,
           latest.ph,
@@ -1844,6 +1878,9 @@ export default {
     }
     if (this.tree2Unsubscribe) {
       this.tree2Unsubscribe();
+    }
+    if (this.tempUnsubscribe) {
+      this.tempUnsubscribe();
     }
     if (this.authUnsubscribe) {
       this.authUnsubscribe();
