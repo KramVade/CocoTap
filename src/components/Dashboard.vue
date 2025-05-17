@@ -1574,16 +1574,16 @@ export default {
       return 'Optimal';
     },
     updateTree1(level, ph, temp) {
-      this.tree1Level = Number(level.toFixed(2));
-      this.tree1PH = Number(ph.toFixed(2));
-      this.tree1Temp = Number(temp.toFixed(1));
-      this.tree1LastUpdated = new Date().toLocaleTimeString();
+      // Only update if values are provided
+      if (level !== undefined) this.tree1Level = Number(level.toFixed(2));
+      if (ph !== undefined) this.tree1PH = Number(ph.toFixed(2));
+      if (temp !== undefined) this.tree1Temp = Number(temp.toFixed(1));
     },
     updateTree2(level, ph, temp) {
-      this.tree2Level = Number(level.toFixed(2));
-      this.tree2PH = Number(ph.toFixed(2));
-      this.tree2Temp = Number(temp.toFixed(1));
-      this.tree2LastUpdated = new Date().toLocaleTimeString();
+      // Only update if values are provided
+      if (level !== undefined) this.tree2Level = Number(level.toFixed(2));
+      if (ph !== undefined) this.tree2PH = Number(ph.toFixed(2));
+      if (temp !== undefined) this.tree2Temp = Number(temp.toFixed(1));
     },
     toggleProfileMenu() {
       this.showProfileMenu = !this.showProfileMenu;
@@ -1681,7 +1681,11 @@ export default {
     onSnapshot(tree1Query, (snapshot) => {
       const latest = snapshot.docs[0]?.data();
       if (latest) {
-        this.tree1Level = parseFloat(latest.volume_liters.doubleValue);
+        this.updateTree1(
+          parseFloat(latest.volume_liters.doubleValue),
+          latest.ph?.doubleValue,
+          latest.temperature?.doubleValue
+        );
         this.tree1LastUpdated = latest.timestamp.stringValue;
       }
     });
@@ -1691,7 +1695,11 @@ export default {
     onSnapshot(tree2Query, (snapshot) => {
       const latest = snapshot.docs[0]?.data();
       if (latest) {
-        this.tree2Level = parseFloat(latest.volume_liters.doubleValue);
+        this.updateTree2(
+          parseFloat(latest.volume_liters.doubleValue),
+          latest.ph?.doubleValue,
+          latest.temperature?.doubleValue
+        );
         this.tree2LastUpdated = latest.timestamp.stringValue;
       }
     });
