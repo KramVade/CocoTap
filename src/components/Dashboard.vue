@@ -1589,16 +1589,28 @@ export default {
       return 'Optimal';
     },
     updateTree1(level, ph, temp) {
-      // Only update if values are provided and convert to numbers
-      if (level !== undefined) this.tree1Level = Number(level);
-      if (ph !== undefined) this.tree1PH = Number(ph);
-      if (temp !== undefined) this.tree1Temp = Number(temp);
+      // Handle both direct values and nested doubleValue objects
+      if (level !== undefined) {
+        this.tree1Level = typeof level === 'object' ? Number(level.doubleValue) : Number(level);
+      }
+      if (ph !== undefined) {
+        this.tree1PH = typeof ph === 'object' ? Number(ph.doubleValue) : Number(ph);
+      }
+      if (temp !== undefined) {
+        this.tree1Temp = typeof temp === 'object' ? Number(temp.doubleValue) : Number(temp);
+      }
     },
     updateTree2(level, ph, temp) {
-      // Only update if values are provided and convert to numbers
-      if (level !== undefined) this.tree2Level = Number(level);
-      if (ph !== undefined) this.tree2PH = Number(ph);
-      if (temp !== undefined) this.tree2Temp = Number(temp);
+      // Handle both direct values and nested doubleValue objects
+      if (level !== undefined) {
+        this.tree2Level = typeof level === 'object' ? Number(level.doubleValue) : Number(level);
+      }
+      if (ph !== undefined) {
+        this.tree2PH = typeof ph === 'object' ? Number(ph.doubleValue) : Number(ph);
+      }
+      if (temp !== undefined) {
+        this.tree2Temp = typeof temp === 'object' ? Number(temp.doubleValue) : Number(temp);
+      }
     },
     toggleProfileMenu() {
       this.showProfileMenu = !this.showProfileMenu;
@@ -1709,8 +1721,20 @@ export default {
     },
     formatDate(timestamp) {
       if (!timestamp) return 'N/A';
-      // Handle both string timestamps and Firestore timestamp objects
-      const date = typeof timestamp === 'string' ? new Date(timestamp) : new Date(timestamp.stringValue);
+      
+      let date;
+      if (typeof timestamp === 'string') {
+        date = new Date(timestamp);
+      } else if (timestamp.stringValue) {
+        date = new Date(timestamp.stringValue);
+      } else {
+        return 'N/A';
+      }
+
+      if (isNaN(date.getTime())) {
+        return 'Invalid Date';
+      }
+
       return date.toLocaleString('en-US', {
         year: 'numeric',
         month: 'short',
@@ -1718,6 +1742,16 @@ export default {
         hour: '2-digit',
         minute: '2-digit'
       });
+    },
+    getTimestampValue(timestamp) {
+      if (!timestamp) return 0;
+      if (typeof timestamp === 'string') {
+        return new Date(timestamp).getTime();
+      }
+      if (timestamp.stringValue) {
+        return new Date(timestamp.stringValue).getTime();
+      }
+      return 0;
     },
   },
   mounted() {
@@ -1742,34 +1776,50 @@ export default {
     });
     
     // Listen for Tree 1 sensor data
-    const tree1Query = query(collection(firestore, "sensor"), orderBy("timestamp", "desc"));
+    const tree1Query = query(collection(firestore, "sensor"));
     this.tree1Unsubscribe = onSnapshot(tree1Query, (snapshot) => {
-      console.log('Tree 1 data received:', snapshot.docs[0]?.data());
-      const latest = snapshot.docs[0]?.data();
+      // Get all documents and find the latest one
+      const docs = snapshot.docs.map(doc => doc.data());
+      const latest = docs.reduce((latest, current) => {
+        const currentTime = this.getTimestampValue(current.timestamp);
+        const latestTime = this.getTimestampValue(latest?.timestamp);
+        return currentTime > latestTime ? current : latest;
+      }, null);
+
+      console.log('Tree 1 latest data:', latest);
       if (latest) {
         this.updateTree1(
-          Number(latest.volume_liters?.doubleValue) || 0,
-          Number(latest.ph?.doubleValue) || 5.75,
-          Number(latest.temperature?.doubleValue) || 25
+          latest.volume_liters,
+          latest.ph,
+          latest.temperature
         );
         this.tree1LastUpdated = this.formatDate(latest.timestamp);
+        console.log('Updated Tree 1 timestamp:', this.tree1LastUpdated);
       }
     }, (error) => {
       console.error('Error fetching Tree 1 data:', error);
     });
 
     // Listen for Tree 2 sensor data
-    const tree2Query = query(collection(firestore, "sensor2"), orderBy("timestamp", "desc"));
+    const tree2Query = query(collection(firestore, "sensor2"));
     this.tree2Unsubscribe = onSnapshot(tree2Query, (snapshot) => {
-      console.log('Tree 2 data received:', snapshot.docs[0]?.data());
-      const latest = snapshot.docs[0]?.data();
+      // Get all documents and find the latest one
+      const docs = snapshot.docs.map(doc => doc.data());
+      const latest = docs.reduce((latest, current) => {
+        const currentTime = this.getTimestampValue(current.timestamp);
+        const latestTime = this.getTimestampValue(latest?.timestamp);
+        return currentTime > latestTime ? current : latest;
+      }, null);
+
+      console.log('Tree 2 latest data:', latest);
       if (latest) {
         this.updateTree2(
-          Number(latest.volume_liters?.doubleValue) || 0,
-          Number(latest.ph?.doubleValue) || 5.75,
-          Number(latest.temperature?.doubleValue) || 25
+          latest.volume_liters,
+          latest.ph,
+          latest.temperature
         );
         this.tree2LastUpdated = this.formatDate(latest.timestamp);
+        console.log('Updated Tree 2 timestamp:', this.tree2LastUpdated);
       }
     }, (error) => {
       console.error('Error fetching Tree 2 data:', error);
