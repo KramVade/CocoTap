@@ -1,7 +1,18 @@
 import { initializeApp } from 'firebase/app'; 
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth'; 
 import { getDatabase, ref, set, onValue, push } from 'firebase/database';
-import { getFirestore, collection, doc, getDoc, getDocs, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { 
+  getFirestore, 
+  collection, 
+  doc, 
+  getDoc, 
+  getDocs, 
+  onSnapshot, 
+  query, 
+  orderBy,
+  setDoc,
+  addDoc
+} from 'firebase/firestore';
 import { VueFire, useFirestore, useDatabase } from 'vuefire';
 
 const firebaseConfig = {
@@ -42,5 +53,7 @@ export {
     getDocs,
     onSnapshot,
     query,
-    orderBy
+    orderBy,
+    setDoc,
+    addDoc
 };

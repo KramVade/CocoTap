@@ -1491,8 +1491,20 @@
 </style>
 
 <script>
-import { auth, provider, signOut, signInWithPopup } from '../firebase';
-import { firestore, collection, query, orderBy, onSnapshot } from '@/firebase';
+import { 
+  auth, 
+  provider, 
+  signOut, 
+  signInWithPopup,
+  firestore,
+  collection,
+  query,
+  orderBy,
+  onSnapshot,
+  getDocs,
+  doc,
+  setDoc
+} from '../firebase';
 
 export default {
   name: 'Dashboard',
@@ -1517,6 +1529,9 @@ export default {
       user: null,
       isLoading: false,
       showSidebar: false,
+      notificationIcon: '📊',
+      notificationMessage: '',
+      showNotification: false
     }
   },
   methods: {
@@ -1574,16 +1589,16 @@ export default {
       return 'Optimal';
     },
     updateTree1(level, ph, temp) {
-      // Only update if values are provided
-      if (level !== undefined) this.tree1Level = Number(level.toFixed(2));
-      if (ph !== undefined) this.tree1PH = Number(ph.toFixed(2));
-      if (temp !== undefined) this.tree1Temp = Number(temp.toFixed(1));
+      // Only update if values are provided and convert to numbers
+      if (level !== undefined) this.tree1Level = Number(level);
+      if (ph !== undefined) this.tree1PH = Number(ph);
+      if (temp !== undefined) this.tree1Temp = Number(temp);
     },
     updateTree2(level, ph, temp) {
-      // Only update if values are provided
-      if (level !== undefined) this.tree2Level = Number(level.toFixed(2));
-      if (ph !== undefined) this.tree2PH = Number(ph.toFixed(2));
-      if (temp !== undefined) this.tree2Temp = Number(temp.toFixed(1));
+      // Only update if values are provided and convert to numbers
+      if (level !== undefined) this.tree2Level = Number(level);
+      if (ph !== undefined) this.tree2PH = Number(ph);
+      if (temp !== undefined) this.tree2Temp = Number(temp);
     },
     toggleProfileMenu() {
       this.showProfileMenu = !this.showProfileMenu;
@@ -1636,35 +1651,19 @@ export default {
     },
     // Add methods for showing messages
     showSuccessMessage(message) {
-      // Create success notification
-      const notification = document.createElement('div');
-      notification.className = 'notification success';
-      notification.innerHTML = `
-        <span class="notification-icon">✓</span>
-        ${message}
-      `;
-      this.showNotification(notification);
+      this.notificationMessage = message;
+      this.notificationIcon = '✓';
+      this.showNotification = true;
+      setTimeout(() => {
+        this.showNotification = false;
+      }, 3000);
     },
     showErrorMessage(message) {
-      // Create error notification
-      const notification = document.createElement('div');
-      notification.className = 'notification error';
-      notification.innerHTML = `
-        <span class="notification-icon">⚠</span>
-        ${message}
-      `;
-      this.showNotification(notification);
-    },
-    showNotification(notification) {
-      // Add notification to document
-      document.body.appendChild(notification);
-      
-      // Remove notification after 3 seconds
+      this.notificationMessage = message;
+      this.notificationIcon = '⚠';
+      this.showNotification = true;
       setTimeout(() => {
-        notification.classList.add('fade-out');
-        setTimeout(() => {
-          document.body.removeChild(notification);
-        }, 300);
+        this.showNotification = false;
       }, 3000);
     },
     toggleSidebar() {
@@ -1674,9 +1673,73 @@ export default {
         sidebar.classList.toggle('show');
       }
     },
+    async addTestData() {
+      try {
+        // Add test data for Tree 1
+        const tree1Data = {
+          volume_liters: { doubleValue: 3.5 },
+          ph: { doubleValue: 5.2 },
+          temperature: { doubleValue: 27.5 },
+          timestamp: { stringValue: new Date().toISOString() }
+        };
+        
+        // Create a new document with auto-generated ID
+        const tree1Ref = doc(collection(firestore, "sensor"));
+        await setDoc(tree1Ref, tree1Data);
+        console.log('Added test data for Tree 1');
+
+        // Add test data for Tree 2
+        const tree2Data = {
+          volume_liters: { doubleValue: 4.2 },
+          ph: { doubleValue: 5.0 },
+          temperature: { doubleValue: 26.8 },
+          timestamp: { stringValue: new Date().toISOString() }
+        };
+        
+        // Create a new document with auto-generated ID
+        const tree2Ref = doc(collection(firestore, "sensor2"));
+        await setDoc(tree2Ref, tree2Data);
+        console.log('Added test data for Tree 2');
+
+        this.showSuccessMessage('Test data added successfully!');
+      } catch (error) {
+        console.error('Error adding test data:', error);
+        this.showErrorMessage('Failed to add test data');
+      }
+    },
+    formatDate(timestamp) {
+      if (!timestamp) return 'N/A';
+      // Handle both string timestamps and Firestore timestamp objects
+      const date = typeof timestamp === 'string' ? new Date(timestamp) : new Date(timestamp.stringValue);
+      return date.toLocaleString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    },
   },
   mounted() {
     console.log('Setting up Firebase listeners...');
+    
+    // First, let's check what collections exist
+    const collections = ['sensor', 'sensor2'];
+    collections.forEach(collectionName => {
+      const q = query(collection(firestore, collectionName));
+      getDocs(q).then((querySnapshot) => {
+        console.log(`Collection ${collectionName} contains:`, querySnapshot.size, 'documents');
+        if (querySnapshot.size === 0) {
+          console.log(`No documents in ${collectionName}, adding test data...`);
+          this.addTestData();
+        }
+        querySnapshot.forEach((doc) => {
+          console.log(`${collectionName} document:`, doc.id, '=>', doc.data());
+        });
+      }).catch((error) => {
+        console.error(`Error getting ${collectionName} collection:`, error);
+      });
+    });
     
     // Listen for Tree 1 sensor data
     const tree1Query = query(collection(firestore, "sensor"), orderBy("timestamp", "desc"));
@@ -1685,11 +1748,11 @@ export default {
       const latest = snapshot.docs[0]?.data();
       if (latest) {
         this.updateTree1(
-          parseFloat(latest.volume_liters?.doubleValue || 0),
-          latest.ph?.doubleValue || 5.75,
-          latest.temperature?.doubleValue || 25
+          Number(latest.volume_liters?.doubleValue) || 0,
+          Number(latest.ph?.doubleValue) || 5.75,
+          Number(latest.temperature?.doubleValue) || 25
         );
-        this.tree1LastUpdated = latest.timestamp?.stringValue || new Date().toISOString();
+        this.tree1LastUpdated = this.formatDate(latest.timestamp);
       }
     }, (error) => {
       console.error('Error fetching Tree 1 data:', error);
@@ -1702,11 +1765,11 @@ export default {
       const latest = snapshot.docs[0]?.data();
       if (latest) {
         this.updateTree2(
-          parseFloat(latest.volume_liters?.doubleValue || 0),
-          latest.ph?.doubleValue || 5.75,
-          latest.temperature?.doubleValue || 25
+          Number(latest.volume_liters?.doubleValue) || 0,
+          Number(latest.ph?.doubleValue) || 5.75,
+          Number(latest.temperature?.doubleValue) || 25
         );
-        this.tree2LastUpdated = latest.timestamp?.stringValue || new Date().toISOString();
+        this.tree2LastUpdated = this.formatDate(latest.timestamp);
       }
     }, (error) => {
       console.error('Error fetching Tree 2 data:', error);
