@@ -1743,7 +1743,7 @@ export default {
     
     // Listen for Tree 1 sensor data
     const tree1Query = query(collection(firestore, "sensor"), orderBy("timestamp", "desc"));
-    onSnapshot(tree1Query, (snapshot) => {
+    this.tree1Unsubscribe = onSnapshot(tree1Query, (snapshot) => {
       console.log('Tree 1 data received:', snapshot.docs[0]?.data());
       const latest = snapshot.docs[0]?.data();
       if (latest) {
@@ -1760,7 +1760,7 @@ export default {
 
     // Listen for Tree 2 sensor data
     const tree2Query = query(collection(firestore, "sensor2"), orderBy("timestamp", "desc"));
-    onSnapshot(tree2Query, (snapshot) => {
+    this.tree2Unsubscribe = onSnapshot(tree2Query, (snapshot) => {
       console.log('Tree 2 data received:', snapshot.docs[0]?.data());
       const latest = snapshot.docs[0]?.data();
       if (latest) {
@@ -1783,9 +1783,21 @@ export default {
     });
 
     // Listen for auth state changes
-    auth.onAuthStateChanged((firebaseUser) => {
+    this.authUnsubscribe = auth.onAuthStateChanged((firebaseUser) => {
       this.updateUserData(firebaseUser);
     });
+  },
+  beforeUnmount() {
+    // Clean up listeners when component is destroyed
+    if (this.tree1Unsubscribe) {
+      this.tree1Unsubscribe();
+    }
+    if (this.tree2Unsubscribe) {
+      this.tree2Unsubscribe();
+    }
+    if (this.authUnsubscribe) {
+      this.authUnsubscribe();
+    }
   }
 }
 </script> 
