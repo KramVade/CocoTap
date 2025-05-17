@@ -1676,32 +1676,40 @@ export default {
     },
   },
   mounted() {
+    console.log('Setting up Firebase listeners...');
+    
     // Listen for Tree 1 sensor data
     const tree1Query = query(collection(firestore, "sensor"), orderBy("timestamp", "desc"));
     onSnapshot(tree1Query, (snapshot) => {
+      console.log('Tree 1 data received:', snapshot.docs[0]?.data());
       const latest = snapshot.docs[0]?.data();
       if (latest) {
         this.updateTree1(
-          parseFloat(latest.volume_liters.doubleValue),
-          latest.ph?.doubleValue,
-          latest.temperature?.doubleValue
+          parseFloat(latest.volume_liters?.doubleValue || 0),
+          latest.ph?.doubleValue || 5.75,
+          latest.temperature?.doubleValue || 25
         );
-        this.tree1LastUpdated = latest.timestamp.stringValue;
+        this.tree1LastUpdated = latest.timestamp?.stringValue || new Date().toISOString();
       }
+    }, (error) => {
+      console.error('Error fetching Tree 1 data:', error);
     });
 
     // Listen for Tree 2 sensor data
     const tree2Query = query(collection(firestore, "sensor2"), orderBy("timestamp", "desc"));
     onSnapshot(tree2Query, (snapshot) => {
+      console.log('Tree 2 data received:', snapshot.docs[0]?.data());
       const latest = snapshot.docs[0]?.data();
       if (latest) {
         this.updateTree2(
-          parseFloat(latest.volume_liters.doubleValue),
-          latest.ph?.doubleValue,
-          latest.temperature?.doubleValue
+          parseFloat(latest.volume_liters?.doubleValue || 0),
+          latest.ph?.doubleValue || 5.75,
+          latest.temperature?.doubleValue || 25
         );
-        this.tree2LastUpdated = latest.timestamp.stringValue;
+        this.tree2LastUpdated = latest.timestamp?.stringValue || new Date().toISOString();
       }
+    }, (error) => {
+      console.error('Error fetching Tree 2 data:', error);
     });
 
     document.addEventListener('click', (e) => {
