@@ -1492,6 +1492,7 @@
 
 <script>
 import { auth, provider, signOut, signInWithPopup } from '../firebase';
+import { firestore, collection, query, orderBy, onSnapshot } from '@/firebase';
 
 export default {
   name: 'Dashboard',
@@ -1503,17 +1504,17 @@ export default {
       // Tree 1 data
       tree1Level: 0,
       tree1PH: 5.75,
-      tree1LastUpdated: new Date().toLocaleTimeString(),
+      tree1LastUpdated: '',
       // Tree 2 data
       tree2Level: 0,
       tree2PH: 5.75,
-      tree2LastUpdated: new Date().toLocaleTimeString(),
+      tree2LastUpdated: '',
       // Add temperature data
       tree1Temp: 25,
       tree2Temp: 25,
       showLogoutModal: false,
       showProfileMenu: false,
-      user: null, // Will store Firebase user data
+      user: null,
       isLoading: false,
       showSidebar: false,
     }
@@ -1675,17 +1676,25 @@ export default {
     },
   },
   mounted() {
-    setInterval(() => {
-      const tree1RandomLevel = Math.random() * 7;
-      const tree1RandomPH = 2 + Math.random() * (5.75 - 2);
-      const tree1RandomTemp = 20 + Math.random() * 15;
-      this.updateTree1(tree1RandomLevel, tree1RandomPH, tree1RandomTemp);
+    // Listen for Tree 1 sensor data
+    const tree1Query = query(collection(firestore, "sensor"), orderBy("timestamp", "desc"));
+    onSnapshot(tree1Query, (snapshot) => {
+      const latest = snapshot.docs[0]?.data();
+      if (latest) {
+        this.tree1Level = parseFloat(latest.volume_liters.doubleValue);
+        this.tree1LastUpdated = latest.timestamp.stringValue;
+      }
+    });
 
-      const tree2RandomLevel = Math.random() * 7;
-      const tree2RandomPH = 2 + Math.random() * (5.75 - 2);
-      const tree2RandomTemp = 20 + Math.random() * 15;
-      this.updateTree2(tree2RandomLevel, tree2RandomPH, tree2RandomTemp);
-    }, 5000);
+    // Listen for Tree 2 sensor data
+    const tree2Query = query(collection(firestore, "sensor2"), orderBy("timestamp", "desc"));
+    onSnapshot(tree2Query, (snapshot) => {
+      const latest = snapshot.docs[0]?.data();
+      if (latest) {
+        this.tree2Level = parseFloat(latest.volume_liters.doubleValue);
+        this.tree2LastUpdated = latest.timestamp.stringValue;
+      }
+    });
 
     document.addEventListener('click', (e) => {
       const profileSection = document.querySelector('.profile-section');

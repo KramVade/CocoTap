@@ -2,6 +2,12 @@
   <div class="home">
     <img alt="Vue logo" src="../assets/logo.png">
     <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <div class="tree-status">
+      <h2>Tree 1 Status</h2>
+      <p>Current Level: {{ tree1Level }} liters</p>
+      <p>Last Updated: {{ tree1LastUpdated }}</p>
+      <p>Container Capacity: {{ containerCapacity }} liters</p>
+    </div>
   </div>
 </template>
 
