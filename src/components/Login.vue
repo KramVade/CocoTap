@@ -5,10 +5,27 @@
       <p class="subtitle">Tuba Production Monitoring System</p>
       
       <div v-if="!user" class="login-form">
-        <button @click="login" class="login-button">
-          <img src="../assets/google-icon.svg" alt="Google" class="google-icon">
-          Login with Google
-        </button>
+        <div v-if="!showPasswordInput" class="login-button-container">
+          <button @click="handleGoogleLogin" class="login-button">
+            <img src="../assets/google-icon.svg" alt="Google" class="google-icon">
+            Login with Google
+          </button>
+        </div>
+        
+        <div v-else class="password-input-container">
+          <input 
+            v-model="password"
+            type="password"
+            placeholder="Enter your password"
+            class="password-input"
+            @keyup.enter="validatePassword"
+          />
+          <div class="password-buttons">
+            <button @click="validatePassword" class="validate-button">Login</button>
+            <button @click="cancelLogin" class="back-button">Back</button>
+          </div>
+          <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+        </div>
       </div>
       
       <div v-else class="user-info">
@@ -28,39 +45,76 @@ export default {
   name: 'Login',
   data() {
     return {
-      user: null
+      user: null,
+      showPasswordInput: false,
+      password: '',
+      errorMessage: '',
+      tempUser: null
     };
   },
   methods: {
-    async login() {
-  try {
-    console.log("Starting sign-in...");
-    const result = await signInWithPopup(auth, provider);
-    console.log("Login result:", result);
-    this.user = result.user;
-    this.$router.push('/dashboard');
-  } catch (error) {
-    console.error('Login error:', error.code, error.message);
-  }
-}
-,
-    async logout() {
+    async handleGoogleLogin() {
+      try {
+        const result = await signInWithPopup(auth, provider);
+        this.tempUser = result.user;
+        this.showPasswordInput = true;
+      } catch (error) {
+        console.error('Login error:', error.code, error.message);
+        this.errorMessage = 'Login failed. Please try again.';
+      }
+    },
+
+    async validatePassword() {
+      // Replace 'your-secure-password' with your actual password
+      const correctPassword = 'your-secure-password';
+      
+      if (this.password === correctPassword) {
+        this.user = this.tempUser;
+        this.errorMessage = '';
+        this.$router.push('/dashboard');
+      } else {
+        this.errorMessage = 'Incorrect password';
+        this.password = '';
+      }
+    },
+
+    async cancelLogin() {
       try {
         await signOut(auth);
         this.user = null;
+        this.tempUser = null;
+        this.showPasswordInput = false;
+        this.password = '';
+        this.errorMessage = '';
       } catch (error) {
         console.error('Logout error:', error);
       }
     },
+
+    async logout() {
+      try {
+        await signOut(auth);
+        this.user = null;
+        this.tempUser = null;
+        this.showPasswordInput = false;
+        this.password = '';
+        this.errorMessage = '';
+      } catch (error) {
+        console.error('Logout error:', error);
+      }
+    },
+
     goToDashboard() {
       this.$router.push('/dashboard');
     }
   },
   created() {
     onAuthStateChanged(auth, (firebaseUser) => {
-      this.user = firebaseUser;
       if (firebaseUser) {
+        this.user = firebaseUser;
         this.$router.push('/dashboard');
+      } else {
+        this.user = null;
       }
     });
   }
@@ -121,6 +175,62 @@ h1 {
   width: 24px;
   height: 24px;
   margin-right: 10px;
+}
+
+.password-input-container {
+  margin-top: 20px;
+}
+
+.password-input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1em;
+  margin-bottom: 15px;
+}
+
+.password-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.validate-button {
+  background-color: #4285f4;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 4px;
+  font-size: 1em;
+  cursor: pointer;
+  flex: 1;
+  transition: background-color 0.3s;
+}
+
+.validate-button:hover {
+  background-color: #357abd;
+}
+
+.back-button {
+  background-color: #95a5a6;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 4px;
+  font-size: 1em;
+  cursor: pointer;
+  flex: 1;
+  transition: background-color 0.3s;
+}
+
+.back-button:hover {
+  background-color: #7f8c8d;
+}
+
+.error-message {
+  color: #e74c3c;
+  margin-top: 10px;
+  font-size: 0.9em;
 }
 
 .user-info {
