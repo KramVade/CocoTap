@@ -57,11 +57,105 @@
 
     <div class="content-wrapper">
       <!-- Navigation Sidebar -->
-      <Sidebar
-        v-model:selectedGroup="selectedGroup"
-        v-model:currentView="currentView"
-        v-model:showSidebar="showSidebar"
-      />
+      <div class="sidebar" :class="{ show: showSidebar }">
+        <div class="nav-header">
+          <h2>Menu</h2>
+        </div>
+        <div class="nav-items">
+          <!-- Container Status Group -->
+          <div class="nav-group">
+            <div 
+              class="nav-group-header"
+              :class="{ active: selectedGroup === 'container' }"
+              @click="toggleGroup('container')"
+            >
+              <span class="nav-icon">🫗</span>
+              Container Status
+              <span class="arrow" :class="{ rotated: selectedGroup === 'container' }">▼</span>
+            </div>
+            <div class="nav-group-items" v-show="selectedGroup === 'container'">
+              <div 
+                class="nav-item" 
+                :class="{ active: currentView === 'tree1-container' }"
+                @click="selectView('tree1-container')"
+              >
+                <span class="nav-icon">🌴</span>
+                Tree 1
+              </div>
+              <div 
+                class="nav-item" 
+                :class="{ active: currentView === 'tree2-container' }"
+                @click="selectView('tree2-container')"
+              >
+                <span class="nav-icon">🌴</span>
+                Tree 2
+              </div>
+            </div>
+          </div>
+
+          <!-- pH Level Group -->
+          <div class="nav-group">
+            <div 
+              class="nav-group-header"
+              :class="{ active: selectedGroup === 'ph' }"
+              @click="toggleGroup('ph')"
+            >
+              <span class="nav-icon">🧪</span>
+              pH Level
+              <span class="arrow" :class="{ rotated: selectedGroup === 'ph' }">▼</span>
+            </div>
+            <div class="nav-group-items" v-show="selectedGroup === 'ph'">
+              <div 
+                class="nav-item" 
+                :class="{ active: currentView === 'tree1-ph' }"
+                @click="currentView = 'tree1-ph'"
+              >
+                <span class="nav-icon">🫗</span>
+                Bottle 1
+              </div>
+              <div 
+                class="nav-item" 
+                :class="{ active: currentView === 'tree2-ph' }"
+                @click="currentView = 'tree2-ph'"
+              >
+                <span class="nav-icon">🫗</span>
+                Bottle 2
+              </div>
+            </div>
+          </div>
+
+          <!-- Temperature Group -->
+          <div class="nav-group">
+            <div 
+              class="nav-group-header"
+              :class="{ active: selectedGroup === 'temperature' }"
+              @click="toggleGroup('temperature')"
+            >
+              <span class="nav-icon">🌡️</span>
+              Temperature
+              <span class="arrow" :class="{ rotated: selectedGroup === 'temperature' }">▼</span>
+            </div>
+            <div class="nav-group-items" v-show="selectedGroup === 'temperature'">
+              <div 
+                class="nav-item" 
+                :class="{ active: currentView === 'tree1-temp' }"
+                @click="currentView = 'tree1-temp'"
+              >
+                <span class="nav-icon">🫗</span>
+                Bottle 1
+              </div>
+              <div 
+                class="nav-item" 
+                :class="{ active: currentView === 'tree2-temp' }"
+                @click="currentView = 'tree2-temp'"
+              >
+                <span class="nav-icon">🫗</span>
+                Bottle 2
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <!-- Sidebar overlay for mobile -->
       <div class="sidebar-overlay" v-if="showSidebar" @click="toggleSidebar"></div>
@@ -1419,13 +1513,9 @@ import {
   setDoc,
   limit
 } from '../firebase';
-import Sidebar from './Sidebar.vue';
 
 export default {
   name: 'Dashboard',
-  components: {
-    Sidebar
-  },
   data() {
     return {
       selectedGroup: 'container',
