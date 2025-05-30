@@ -5,8 +5,13 @@
       <button class="menu-toggle" @click="toggleSidebar">
         <span class="hamburger-icon">☰</span>
       </button>
-      <h1 class="app-title">CocoTap</h1>
-      <p class="app-subtitle">Tuba Production Monitoring System</p>
+      <div class="header-center-group">
+        <img src="/img/logo/CocoTap Logo.png" alt="CocoTap Logo" class="header-logo" />
+        <div class="header-text-group">
+          <h1 class="app-title">CocoTap</h1>
+          <p class="app-subtitle">Tuba Production Monitoring System</p>
+        </div>
+      </div>
       
       <!-- Add back the profile section -->
       <div class="profile-section">
@@ -69,7 +74,7 @@
               :class="{ active: selectedGroup === 'container' }"
               @click="toggleGroup('container')"
             >
-              <span class="nav-icon">🫗</span>
+              <span class="nav-icon">🍾</span>
               Container Status
               <span class="arrow" :class="{ rotated: selectedGroup === 'container' }">▼</span>
             </div>
@@ -110,7 +115,7 @@
                 :class="{ active: currentView === 'tree1-ph' }"
                 @click="currentView = 'tree1-ph'"
               >
-                <span class="nav-icon">🫗</span>
+                <span class="nav-icon">🍾</span>
                 Bottle 1
               </div>
               <div 
@@ -118,7 +123,7 @@
                 :class="{ active: currentView === 'tree2-ph' }"
                 @click="currentView = 'tree2-ph'"
               >
-                <span class="nav-icon">🫗</span>
+                <span class="nav-icon">🍾</span>
                 Bottle 2
               </div>
             </div>
@@ -141,7 +146,7 @@
                 :class="{ active: currentView === 'tree1-temp' }"
                 @click="currentView = 'tree1-temp'"
               >
-                <span class="nav-icon">🫗</span>
+                <span class="nav-icon">🍾</span>
                 Bottle 1
               </div>
               <div 
@@ -149,7 +154,7 @@
                 :class="{ active: currentView === 'tree2-temp' }"
                 @click="currentView = 'tree2-temp'"
               >
-                <span class="nav-icon">🫗</span>
+                <span class="nav-icon">🍾</span>
                 Bottle 2
               </div>
             </div>
@@ -211,13 +216,54 @@
                     <span class="stat-label">Last Updated</span>
                     <span class="stat-value">{{ tree1LastUpdated }}</span>
                   </div>
+                  <div class="stat-item valve-control">
+                    <span class="stat-label">Valve Status</span>
+                    <div class="valve-status-group">
+                      <span class="stat-value" :class="{ 'active': isValveOpen }">
+                        {{ isValveOpen ? 'Open' : 'Closed' }}
+                      </span>
+                      <button 
+                        class="valve-toggle-btn" 
+                        :class="{ 'active': isValveOpen }"
+                        @click="toggleValve"
+                        :disabled="isValveLoading"
+                      >
+                        <span v-if="isValveLoading" class="loading-spinner"></span>
+                        <span v-else>{{ isValveOpen ? 'Close Valve' : 'Open Valve' }}</span>
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
 
               <div class="chart-card">
                 <h2>Content Level History</h2>
                 <div class="chart-container">
-                  <p class="placeholder">Historical Level Chart</p>
+                  <div class="history-chart">
+                    <div class="chart-lines">
+                      <!-- Horizontal grid lines for content level -->
+                      <div v-for="n in Math.max(containerCapacity, 1)" :key="n" class="chart-grid-line"
+                           :style="{ bottom: `${(n / containerCapacity) * 100}%` }"></div>
+                      <div v-for="(point, index) in tree1History" 
+                           :key="index" 
+                           class="chart-point"
+                           :style="{
+                             left: `${(index / (tree1History.length - 1 || 1)) * 100}%`,
+                             bottom: `${(point.level / containerCapacity) * 100}%`
+                           }">
+                      </div>
+                    </div>
+                    <div class="chart-labels">
+                      <div class="y-axis">
+                        <span>{{ containerCapacity }}L</span>
+                        <span>0L</span>
+                      </div>
+                      <div class="x-axis">
+                        <span>{{ tree1History.length > 0 ? formatTimestamp(tree1History[tree1History.length - 1]?.timestamp) : 'No data' }}</span>
+                        <span>{{ tree1History.length > 0 ? formatTimestamp(tree1History[0]?.timestamp) : 'No data' }}</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -274,7 +320,31 @@
               <div class="chart-card">
                 <h2>pH Level History</h2>
                 <div class="chart-container">
-                  <p class="placeholder">pH History Chart</p>
+                  <div class="history-chart">
+                    <div class="chart-lines">
+                      <!-- Horizontal grid lines for pH (2 to 5.75, every 0.5) -->
+                      <div v-for="n in 8" :key="n" class="chart-grid-line"
+                           :style="{ bottom: `${(((2 + (n - 1) * 0.5) - 2) / (5.75 - 2)) * 100}%` }"></div>
+                      <div v-for="(point, index) in tree1PHHistory" 
+                           :key="index" 
+                           class="chart-point"
+                           :style="{
+                             left: `${(index / (tree1PHHistory.length - 1 || 1)) * 100}%`,
+                             bottom: `${((point.pH - 2) / (5.75 - 2) * 100)}%`
+                           }">
+                      </div>
+                    </div>
+                    <div class="chart-labels">
+                      <div class="y-axis">
+                        <span>5.75</span>
+                        <span>2</span>
+                      </div>
+                      <div class="x-axis">
+                        <span>{{ tree1PHHistory.length > 0 ? formatTimestamp(tree1PHHistory[tree1PHHistory.length - 1]?.timestamp) : 'No data' }}</span>
+                        <span>{{ tree1PHHistory.length > 0 ? formatTimestamp(tree1PHHistory[0]?.timestamp) : 'No data' }}</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -334,7 +404,31 @@
               <div class="chart-card">
                 <h2>Content Level History</h2>
                 <div class="chart-container">
-                  <p class="placeholder">Historical Level Chart</p>
+                  <div class="history-chart">
+                    <div class="chart-lines">
+                      <!-- Horizontal grid lines for content level -->
+                      <div v-for="n in Math.max(containerCapacity, 1)" :key="n" class="chart-grid-line"
+                           :style="{ bottom: `${(n / containerCapacity) * 100}%` }"></div>
+                      <div v-for="(point, index) in tree2History" 
+                           :key="index" 
+                           class="chart-point"
+                           :style="{
+                             left: `${(index / (tree2History.length - 1 || 1)) * 100}%`,
+                             bottom: `${(point.level / containerCapacity) * 100}%`
+                           }">
+                      </div>
+                    </div>
+                    <div class="chart-labels">
+                      <div class="y-axis">
+                        <span>{{ containerCapacity }}L</span>
+                        <span>0L</span>
+                      </div>
+                      <div class="x-axis">
+                        <span>{{ tree2History.length > 0 ? formatTimestamp(tree2History[tree2History.length - 1]?.timestamp) : 'No data' }}</span>
+                        <span>{{ tree2History.length > 0 ? formatTimestamp(tree2History[0]?.timestamp) : 'No data' }}</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -391,7 +485,31 @@
               <div class="chart-card">
                 <h2>pH Level History</h2>
                 <div class="chart-container">
-                  <p class="placeholder">pH History Chart</p>
+                  <div class="history-chart">
+                    <div class="chart-lines">
+                      <!-- Horizontal grid lines for pH (2 to 5.75, every 0.5) -->
+                      <div v-for="n in 8" :key="n" class="chart-grid-line"
+                           :style="{ bottom: `${(((2 + (n - 1) * 0.5) - 2) / (5.75 - 2)) * 100}%` }"></div>
+                      <div v-for="(point, index) in tree2PHHistory" 
+                           :key="index" 
+                           class="chart-point"
+                           :style="{
+                             left: `${(index / (tree2PHHistory.length - 1 || 1)) * 100}%`,
+                             bottom: `${((point.pH - 2) / (5.75 - 2) * 100)}%`
+                           }">
+                      </div>
+                    </div>
+                    <div class="chart-labels">
+                      <div class="y-axis">
+                        <span>5.75</span>
+                        <span>2</span>
+                      </div>
+                      <div class="x-axis">
+                        <span>{{ tree2PHHistory.length > 0 ? formatTimestamp(tree2PHHistory[tree2PHHistory.length - 1]?.timestamp) : 'No data' }}</span>
+                        <span>{{ tree2PHHistory.length > 0 ? formatTimestamp(tree2PHHistory[0]?.timestamp) : 'No data' }}</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -454,7 +572,31 @@
               <div class="chart-card">
                 <h2>Temperature History</h2>
                 <div class="chart-container">
-                  <p class="placeholder">Temperature History Chart</p>
+                  <div class="history-chart">
+                    <div class="chart-lines">
+                      <!-- Horizontal grid lines for temperature (20°C to 35°C, every 3°C) -->
+                      <div v-for="n in 6" :key="n" class="chart-grid-line"
+                           :style="{ bottom: `${(((20 + (n - 1) * 3) - 20) / (35 - 20)) * 100}%` }"></div>
+                      <div v-for="(point, index) in tree1TempHistory" 
+                           :key="index" 
+                           class="chart-point"
+                           :style="{
+                             left: `${(index / (tree1TempHistory.length - 1 || 1)) * 100}%`,
+                             bottom: `${((point.temp - 20) / (35 - 20) * 100)}%`
+                           }">
+                      </div>
+                    </div>
+                    <div class="chart-labels">
+                      <div class="y-axis">
+                        <span>35°C</span>
+                        <span>20°C</span>
+                      </div>
+                      <div class="x-axis">
+                        <span>{{ tree1TempHistory.length > 0 ? formatTimestamp(tree1TempHistory[tree1TempHistory.length - 1]?.timestamp) : 'No data' }}</span>
+                        <span>{{ tree1TempHistory.length > 0 ? formatTimestamp(tree1TempHistory[0]?.timestamp) : 'No data' }}</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -517,7 +659,31 @@
               <div class="chart-card">
                 <h2>Temperature History</h2>
                 <div class="chart-container">
-                  <p class="placeholder">Temperature History Chart</p>
+                  <div class="history-chart">
+                    <div class="chart-lines">
+                      <!-- Horizontal grid lines for temperature (20°C to 35°C, every 3°C) -->
+                      <div v-for="n in 6" :key="n" class="chart-grid-line"
+                           :style="{ bottom: `${(((20 + (n - 1) * 3) - 20) / (35 - 20)) * 100}%` }"></div>
+                      <div v-for="(point, index) in tree2TempHistory" 
+                           :key="index" 
+                           class="chart-point"
+                           :style="{
+                             left: `${(index / (tree2TempHistory.length - 1 || 1)) * 100}%`,
+                             bottom: `${((point.temp - 20) / (35 - 20) * 100)}%`
+                           }">
+                      </div>
+                    </div>
+                    <div class="chart-labels">
+                      <div class="y-axis">
+                        <span>35°C</span>
+                        <span>20°C</span>
+                      </div>
+                      <div class="x-axis">
+                        <span>{{ tree2TempHistory.length > 0 ? formatTimestamp(tree2TempHistory[tree2TempHistory.length - 1]?.timestamp) : 'No data' }}</span>
+                        <span>{{ tree2TempHistory.length > 0 ? formatTimestamp(tree2TempHistory[0]?.timestamp) : 'No data' }}</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -573,16 +739,53 @@
 .main-header {
   width: 100%;
   background-color: white;
-  padding: 20px;
+  padding: 0 20px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  text-align: center;
   position: fixed;
   top: 0;
   left: 0;
   z-index: 1000;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
+  height: 100px;
+  min-height: 80px;
+  justify-content: center;
+}
+
+.header-center-group {
+  display: flex;
+  align-items: center;
+  margin: 0 auto;
+}
+
+.header-logo {
+  height: 80px;
+  width: auto;
+  margin-right: 20px;
+  flex-shrink: 0;
+  display: block;
+}
+
+.header-text-group {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100%;
+}
+
+.app-title {
+  font-size: 2.5em;
+  color: var(--color-darkest);
+  margin: 0;
+  text-align: left;
+}
+
+.app-subtitle {
+  font-size: 1.2em;
+  color: var(--color-dark);
+  margin: 5px 0 0;
+  text-align: left;
 }
 
 .menu-toggle {
@@ -602,18 +805,6 @@
 
 .hamburger-icon {
   display: block;
-}
-
-.app-title {
-  font-size: 2.5em;
-  color: var(--color-darkest);
-  margin: 0;
-}
-
-.app-subtitle {
-  font-size: 1.2em;
-  color: var(--color-dark);
-  margin: 5px 0 0;
 }
 
 .content-wrapper {
@@ -1574,6 +1765,134 @@
     padding: 10px;
   }
 }
+
+.history-chart {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 20px;
+}
+
+.chart-lines {
+  position: relative;
+  width: 100%;
+  height: calc(100% - 40px);
+  border-left: 1px solid #ddd;
+  border-bottom: 1px solid #ddd;
+  margin-left: 0;
+}
+
+.chart-point {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background-color: #3498db;
+  border-radius: 50%;
+  transform: translate(-50%, 50%);
+}
+
+.chart-point::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(52, 152, 219, 0.2);
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(2);
+}
+
+.chart-labels {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+
+.y-axis {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  color: #666;
+  font-size: 0.8em;
+  padding-right: 8px;
+  align-items: flex-start;
+}
+
+.x-axis {
+  position: absolute;
+  bottom: -20px;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  color: #666;
+  font-size: 0.8em;
+}
+
+.chart-grid-line {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: #e0e0e0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.valve-control {
+  grid-column: 1 / -1;
+  margin-top: 10px;
+}
+
+.valve-status-group {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.stat-value.active {
+  color: #27ae60;
+}
+
+.valve-toggle-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  background-color: #e74c3c;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 120px;
+}
+
+.valve-toggle-btn.active {
+  background-color: #27ae60;
+}
+
+.valve-toggle-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.valve-toggle-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.valve-toggle-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
 </style>
 
 <script>
@@ -1585,35 +1904,25 @@ import {
   firestore,
   collection,
   query,
-  orderBy,
-  onSnapshot,
   getDocs,
   doc,
   setDoc,
-  limit
+  updateDoc,
+  onSnapshot,
+  getDoc
 } from '../firebase';
+import SensorData from './SensorData.vue';
+import { watch } from 'vue';
 
 export default {
   name: 'Dashboard',
+  components: {
+    SensorData
+  },
   data() {
     return {
       selectedGroup: 'container',
       currentView: 'tree1-container',
-      containerCapacity: 7,
-      // Tree 1 data
-      tree1Level: 0,
-      tree1PH: 5.75,
-      tree1LastUpdated: '',
-      // Tree 2 data
-      tree2Level: 0,
-      tree2PH: 5.75,
-      tree2LastUpdated: '',
-      // Add temperature data
-      tree1Temp: 25,
-      tree2Temp: 25,
-      // Add temperature sensor data
-      temperatureReadings: [],
-      lastTemperatureReading: null,
       showLogoutModal: false,
       showProfileMenu: false,
       user: null,
@@ -1621,13 +1930,72 @@ export default {
       showSidebar: false,
       notificationIcon: '📊',
       notificationMessage: '',
-      showNotification: false
+      showNotification: false,
+      isValveOpen: false,
+      isValveLoading: false,
+      valveControlDoc: null,
+      valveUpdateLock: false,
+      manualOverride: false,
+      lastValveUpdate: null
     }
+  },
+  setup() {
+    const {
+      tree1Level,
+      tree1PH,
+      tree1Temp,
+      tree1LastUpdated,
+      tree2Level,
+      tree2PH,
+      tree2Temp,
+      tree2LastUpdated,
+      lastTemperatureReading,
+      containerCapacity,
+      formatTimestamp,
+      tree1History,
+      tree2History,
+      tree1PHHistory,
+      tree2PHHistory,
+      tree1TempHistory,
+      tree2TempHistory
+    } = SensorData.setup();
+
+    // Add watchers to debug pH values
+    watch(tree1PH, (newValue) => {
+      console.log('Dashboard: tree1PH changed to:', newValue);
+    });
+
+    watch(tree2PH, (newValue) => {
+      console.log('Dashboard: tree2PH changed to:', newValue);
+    });
+
+    watch(tree1PHHistory, (newValue) => {
+      console.log('Dashboard: tree1PHHistory updated:', newValue);
+    }, { deep: true });
+
+    return {
+      tree1Level,
+      tree1PH,
+      tree1Temp,
+      tree1LastUpdated,
+      tree2Level,
+      tree2PH,
+      tree2Temp,
+      tree2LastUpdated,
+      lastTemperatureReading,
+      containerCapacity,
+      formatTimestamp,
+      tree1History,
+      tree2History,
+      tree1PHHistory,
+      tree2PHHistory,
+      tree1TempHistory,
+      tree2TempHistory
+    };
   },
   methods: {
     toggleGroup(group) {
       this.selectedGroup = this.selectedGroup === group ? null : group;
-      // Set default view for selected group
       if (group === 'container') {
         this.currentView = 'tree1-container';
       } else if (group === 'ph') {
@@ -1638,7 +2006,6 @@ export default {
     },
     selectView(view) {
       this.currentView = view;
-      // Auto-close sidebar on mobile
       if (window.innerWidth <= 768) {
         this.showSidebar = false;
       }
@@ -1678,34 +2045,9 @@ export default {
       if (temp > 30) return 'High';
       return 'Optimal';
     },
-    updateTree1(level, ph, temp) {
-      // Handle both direct values and nested doubleValue objects
-      if (level !== undefined) {
-        this.tree1Level = typeof level === 'object' ? Number(level.doubleValue) : Number(level);
-      }
-      if (ph !== undefined) {
-        this.tree1PH = typeof ph === 'object' ? Number(ph.doubleValue) : Number(ph);
-      }
-      if (temp !== undefined) {
-        this.tree1Temp = typeof temp === 'object' ? Number(temp.doubleValue) : Number(temp);
-      }
-    },
-    updateTree2(level, ph, temp) {
-      // Handle both direct values and nested doubleValue objects
-      if (level !== undefined) {
-        this.tree2Level = typeof level === 'object' ? Number(level.doubleValue) : Number(level);
-      }
-      if (ph !== undefined) {
-        this.tree2PH = typeof ph === 'object' ? Number(ph.doubleValue) : Number(ph);
-      }
-      if (temp !== undefined) {
-        this.tree2Temp = typeof temp === 'object' ? Number(temp.doubleValue) : Number(temp);
-      }
-    },
     toggleProfileMenu() {
       this.showProfileMenu = !this.showProfileMenu;
     },
-    // Update user data when authenticated
     updateUserData(firebaseUser) {
       if (firebaseUser) {
         this.user = {
@@ -1719,39 +2061,25 @@ export default {
     },
     async changeAccount() {
       try {
-        // Set prompt parameter to 'select_account' to force account selection
         provider.setCustomParameters({
           prompt: 'select_account'
         });
         
-        // Sign out current user
         await signOut(auth);
-        
-        // Show loading state (optional)
         this.isLoading = true;
         
-        // Sign in with popup and force account selection
         const result = await signInWithPopup(auth, provider);
-        
-        // Update user data with new account
         this.updateUserData(result.user);
-        
-        // Close profile menu
         this.showProfileMenu = false;
-        
-        // Show success message
         this.showSuccessMessage('Account changed successfully!');
         
       } catch (error) {
         console.error('Change account error:', error);
-        // Show error message to user
         this.showErrorMessage('Failed to change account. Please try again.');
       } finally {
-        // Hide loading state (optional)
         this.isLoading = false;
       }
     },
-    // Add methods for showing messages
     showSuccessMessage(message) {
       this.notificationMessage = message;
       this.notificationIcon = '✓';
@@ -1775,169 +2103,136 @@ export default {
         sidebar.classList.toggle('show');
       }
     },
-    async addTestData() {
-      try {
-        // Add test data for Tree 1
-        const tree1Data = {
-          volume_liters: { doubleValue: 3.5 },
-          ph: { doubleValue: 5.2 },
-          temperature: { doubleValue: 27.5 },
-          timestamp: { stringValue: new Date().toISOString() }
-        };
-        
-        // Create a new document with auto-generated ID
-        const tree1Ref = doc(collection(firestore, "sensor"));
-        await setDoc(tree1Ref, tree1Data);
-        console.log('Added test data for Tree 1');
-
-        // Add test data for Tree 2
-        const tree2Data = {
-          volume_liters: { doubleValue: 4.2 },
-          ph: { doubleValue: 5.0 },
-          temperature: { doubleValue: 26.8 },
-          timestamp: { stringValue: new Date().toISOString() }
-        };
-        
-        // Create a new document with auto-generated ID
-        const tree2Ref = doc(collection(firestore, "sensor2"));
-        await setDoc(tree2Ref, tree2Data);
-        console.log('Added test data for Tree 2');
-
-        this.showSuccessMessage('Test data added successfully!');
-      } catch (error) {
-        console.error('Error adding test data:', error);
-        this.showErrorMessage('Failed to add test data');
-      }
-    },
-    formatDate(timestamp) {
-      if (!timestamp) return 'N/A';
+    async toggleValve() {
+      if (this.isValveLoading) return;
       
-      let date;
-      if (typeof timestamp === 'string') {
-        date = new Date(timestamp);
-      } else if (timestamp.stringValue) {
-        date = new Date(timestamp.stringValue);
-      } else {
-        return 'N/A';
+      this.isValveLoading = true;
+      try {
+        const newState = !this.isValveOpen;
+        const timestamp = new Date().toISOString();
+        
+        // Check if we're already processing an update
+        if (this.valveUpdateLock) {
+          console.log('Ignoring valve state change due to lock');
+          return;
+        }
+        
+        // Set the lock
+        this.valveUpdateLock = true;
+        
+        const valveRef = doc(firestore, 'control', 'valve');
+        
+        // Update the valve state with timestamp and manual override status
+        await setDoc(valveRef, {
+          fields: {
+            valveState: {
+              booleanValue: newState
+            },
+            lastUpdated: {
+              timestampValue: timestamp
+            },
+            manualOverride: {
+              booleanValue: newState !== this.isValveOpen // Set manual override when state changes
+            }
+          }
+        }, { merge: true });
+        
+        this.isValveOpen = newState;
+        this.lastValveUpdate = timestamp;
+        this.manualOverride = newState !== this.isValveOpen;
+        
+        this.showSuccessMessage(`Valve ${newState ? 'opened' : 'closed'} successfully`);
+      } catch (error) {
+        console.error('Error toggling valve:', error);
+        this.showErrorMessage('Failed to control valve. Please try again.');
+      } finally {
+        this.isValveLoading = false;
+        // Release the lock after a short delay to prevent race conditions
+        setTimeout(() => {
+          this.valveUpdateLock = false;
+          console.log('Valve update lock released');
+        }, 1000);
       }
-
-      if (isNaN(date.getTime())) {
-        return 'Invalid Date';
-      }
-
-      return date.toLocaleString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
-      });
     },
-    getTimestampValue(timestamp) {
-      if (!timestamp) return 0;
-      if (typeof timestamp === 'string') {
-        return new Date(timestamp).getTime();
+    async initializeValveControl() {
+      try {
+        const valveRef = doc(firestore, 'control', 'valve');
+        const valveDoc = await getDoc(valveRef);
+        
+        // Always ensure valve starts closed on initialization
+        await setDoc(valveRef, {
+          fields: {
+            valveState: {
+              booleanValue: false
+            },
+            lastUpdated: {
+              timestampValue: new Date().toISOString()
+            },
+            manualOverride: {
+              booleanValue: false
+            }
+          }
+        }, { merge: true });
+        
+        this.isValveOpen = false;
+        this.manualOverride = false;
+        this.lastValveUpdate = new Date().toISOString();
+        
+        this.valveControlDoc = valveRef;
+        
+        // Listen for valve state changes
+        onSnapshot(valveRef, (doc) => {
+          if (doc.exists()) {
+            const data = doc.data();
+            const newTimestamp = data.fields?.lastUpdated?.timestampValue;
+            
+            // Ignore older updates
+            if (this.lastValveUpdate && newTimestamp < this.lastValveUpdate) {
+              console.log('Ignoring older valve state change');
+              return;
+            }
+            
+            // Check if we're currently processing an update
+            if (this.valveUpdateLock) {
+              console.log('Ignoring valve state change due to lock');
+              return;
+            }
+            
+            const newState = data.fields?.valveState?.booleanValue ?? false;
+            const newManualOverride = data.fields?.manualOverride?.booleanValue ?? false;
+            
+            this.isValveOpen = newState;
+            this.manualOverride = newManualOverride;
+            this.lastValveUpdate = newTimestamp;
+          }
+        });
+      } catch (error) {
+        console.error('Error initializing valve control:', error);
+        this.isValveOpen = false;
+        this.manualOverride = false;
       }
-      if (timestamp.stringValue) {
-        return new Date(timestamp.stringValue).getTime();
-      }
-      return 0;
     },
+    checkContainerLevel() {
+      // Don't auto-control valve if manual override is active
+      if (this.manualOverride) return;
+      
+      const fillPercentage = (this.tree1Level / this.containerCapacity) * 100;
+      if (fillPercentage >= 90 && !this.isValveOpen) {
+        this.toggleValve();
+      } else if (fillPercentage < 90 && this.isValveOpen) {
+        this.toggleValve();
+      }
+    }
+  },
+  watch: {
+    tree1Level: {
+      handler(newLevel) {
+        this.checkContainerLevel();
+      },
+      immediate: true
+    }
   },
   mounted() {
-    console.log('Setting up Firebase listeners...');
-    
-    // First, let's check what collections exist
-    const collections = ['sensor', 'sensor2'];
-    collections.forEach(collectionName => {
-      const q = query(collection(firestore, collectionName));
-      getDocs(q).then((querySnapshot) => {
-        console.log(`Collection ${collectionName} contains:`, querySnapshot.size, 'documents');
-        if (querySnapshot.size === 0) {
-          console.log(`No documents in ${collectionName}, adding test data...`);
-          this.addTestData();
-        }
-        querySnapshot.forEach((doc) => {
-          console.log(`${collectionName} document:`, doc.id, '=>', doc.data());
-        });
-      }).catch((error) => {
-        console.error(`Error getting ${collectionName} collection:`, error);
-      });
-    });
-
-    // Listen for temperature sensor readings from the temp_sensor collection
-    const tempQuery = query(
-      collection(firestore, "temp_sensor"),
-      orderBy("timestamp", "desc")
-    );
-    
-    this.tempUnsubscribe = onSnapshot(tempQuery, (snapshot) => {
-      if (!snapshot.empty) {
-        const latest = snapshot.docs[0].data();
-        console.log('New temperature reading received:', latest);
-        
-        this.lastTemperatureReading = {
-          temperature: latest.temperature_celsius,
-          timestamp: latest.timestamp
-        };
-        // Update both tree temperatures with the latest reading
-        this.tree1Temp = this.lastTemperatureReading.temperature;
-        this.tree2Temp = this.lastTemperatureReading.temperature;
-        console.log('Updated temperature to:', this.tree1Temp, 'at', this.formatDate(latest.timestamp));
-      }
-    }, (error) => {
-      console.error('Error fetching temperature data:', error);
-    });
-
-    // Listen for Tree 1 sensor data
-    const tree1Query = query(
-      collection(firestore, "sensor"),
-      orderBy("timestamp", "desc")
-    );
-    
-    this.tree1Unsubscribe = onSnapshot(tree1Query, (snapshot) => {
-      if (!snapshot.empty) {
-        const docs = snapshot.docs.map(doc => doc.data());
-        const latest = docs[0]; // Most recent reading
-        console.log('Tree 1 new data received:', latest);
-        
-        this.updateTree1(
-          latest.volume_liters,
-          latest.ph,
-          latest.temperature_celsius
-        );
-        this.tree1LastUpdated = this.formatDate(latest.timestamp);
-        console.log('Updated Tree 1 timestamp:', this.tree1LastUpdated);
-      }
-    }, (error) => {
-      console.error('Error fetching Tree 1 data:', error);
-    });
-
-    // Listen for Tree 2 sensor data
-    const tree2Query = query(
-      collection(firestore, "sensor2"),
-      orderBy("timestamp", "desc")
-    );
-    
-    this.tree2Unsubscribe = onSnapshot(tree2Query, (snapshot) => {
-      if (!snapshot.empty) {
-        const docs = snapshot.docs.map(doc => doc.data());
-        const latest = docs[0]; // Most recent reading
-        console.log('Tree 2 new data received:', latest);
-        
-        this.updateTree2(
-          latest.volume_liters,
-          latest.ph,
-          latest.temperature
-        );
-        this.tree2LastUpdated = this.formatDate(latest.timestamp);
-        console.log('Updated Tree 2 timestamp:', this.tree2LastUpdated);
-      }
-    }, (error) => {
-      console.error('Error fetching Tree 2 data:', error);
-    });
-
     document.addEventListener('click', (e) => {
       const profileSection = document.querySelector('.profile-section');
       if (profileSection && !profileSection.contains(e.target)) {
@@ -1949,18 +2244,10 @@ export default {
     this.authUnsubscribe = auth.onAuthStateChanged((firebaseUser) => {
       this.updateUserData(firebaseUser);
     });
+
+    this.initializeValveControl();
   },
   beforeUnmount() {
-    // Clean up listeners when component is destroyed
-    if (this.tree1Unsubscribe) {
-      this.tree1Unsubscribe();
-    }
-    if (this.tree2Unsubscribe) {
-      this.tree2Unsubscribe();
-    }
-    if (this.tempUnsubscribe) {
-      this.tempUnsubscribe();
-    }
     if (this.authUnsubscribe) {
       this.authUnsubscribe();
     }

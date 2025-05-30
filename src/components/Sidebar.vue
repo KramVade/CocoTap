@@ -11,7 +11,7 @@
           :class="{ active: selectedGroup === 'container' }"
           @click="toggleGroup('container')"
         >
-          <span class="nav-icon">🫗</span>
+          <span class="nav-icon">🍾</span>
           Container Status
           <span class="arrow" :class="{ rotated: selectedGroup === 'container' }">▼</span>
         </div>
@@ -52,7 +52,7 @@
             :class="{ active: currentView === 'tree1-ph' }"
             @click="selectView('tree1-ph')"
           >
-            <span class="nav-icon">🫗</span>
+            <span class="nav-icon">🍾</span>
             Bottle 1
           </div>
           <div 
@@ -60,7 +60,7 @@
             :class="{ active: currentView === 'tree2-ph' }"
             @click="selectView('tree2-ph')"
           >
-            <span class="nav-icon">🫗</span>
+            <span class="nav-icon">🍾</span>
             Bottle 2
           </div>
         </div>
@@ -83,7 +83,7 @@
             :class="{ active: currentView === 'tree1-temp' }"
             @click="selectView('tree1-temp')"
           >
-            <span class="nav-icon">🫗</span>
+            <span class="nav-icon">🍾</span>
             Bottle 1
           </div>
           <div 
@@ -91,7 +91,7 @@
             :class="{ active: currentView === 'tree2-temp' }"
             @click="selectView('tree2-temp')"
           >
-            <span class="nav-icon">🫗</span>
+            <span class="nav-icon">🍾</span>
             Bottle 2
           </div>
         </div>
