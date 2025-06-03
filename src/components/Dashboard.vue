@@ -191,78 +191,12 @@
               <h2>Tree 1 - pH Status</h2>
             </div>
             <div class="content-grid">
-              <!-- pH Visualization -->
-              <div class="visualization-card">
-                <h2>Fermentation Status</h2>
-                <div class="ph-container">
-                  <div class="ph-meter">
-                    <div class="ph-scale">
-                      <div class="ph-indicator" :style="{ left: `${((tree1PH - 2) / (5.75 - 2)) * 100}%` }">
-                        <div class="ph-value">pH {{ tree1PH }}</div>
-                      </div>
-                      <div class="ph-labels">
-                        <span>Vinegar (pH 2)</span>
-                        <span>Tuba (pH 5.75)</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="fermentation-status" :class="getTree1FermentationStatus().toLowerCase()">
-                    Current Status: {{ getTree1FermentationStatus() }}
-                  </div>
-                </div>
-              </div>
-
-              <!-- pH Statistics -->
-              <div class="data-card">
-                <h2>Fermentation Analysis</h2>
-                <div class="stats-grid">
-                  <div class="stat-item">
-                    <span class="stat-label">Current pH</span>
-                    <span class="stat-value">{{ tree1PH }}</span>
-                  </div>
-                  <div class="stat-item">
-                    <span class="stat-label">Status</span>
-                    <span class="stat-value" :class="getTree1FermentationStatus().toLowerCase()">
-                      {{ getTree1FermentationStatus() }}
-                    </span>
-                  </div>
-                  <div class="stat-item">
-                    <span class="stat-label">Last Reading</span>
-                    <span class="stat-value">{{ tree1LastUpdated }}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div class="chart-card">
-                <h2>pH Level History</h2>
-                <div class="chart-container">
-                  <div class="history-chart">
-                    <div class="chart-lines">
-                      <!-- Horizontal grid lines for pH (2 to 5.75, every 0.5) -->
-                      <div v-for="n in 8" :key="n" class="chart-grid-line"
-                           :style="{ bottom: `${(((2 + (n - 1) * 0.5) - 2) / (5.75 - 2)) * 100}%` }"></div>
-                      <div v-for="(point, index) in tree1PHHistory" 
-                           :key="index" 
-                           class="chart-point"
-                           :style="{
-                             left: `${(index / (tree1PHHistory.length - 1 || 1)) * 100}%`,
-                             bottom: `${((point.pH - 2) / (5.75 - 2) * 100)}%`
-                           }">
-                      </div>
-                    </div>
-                    <div class="chart-labels">
-                      <div class="y-axis">
-                        <span>5.75</span>
-                        <span>2</span>
-                      </div>
-                      <div class="x-axis">
-                        <span>{{ tree1PHHistory.length > 0 ? formatTimestamp(tree1PHHistory[tree1PHHistory.length - 1]?.timestamp) : 'No data' }}</span>
-                        <span>{{ tree1PHHistory.length > 0 ? formatTimestamp(tree1PHHistory[0]?.timestamp) : 'No data' }}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <PHStatus
+                :ph="tree1PH"
+                :last-updated="tree1LastUpdated"
+                :history="tree1PHHistory"
+                :format-timestamp="formatTimestamp"
+              />
             </div>
           </div>
 
@@ -288,78 +222,12 @@
               <h2>Tree 2 - pH Status</h2>
             </div>
             <div class="content-grid">
-              <!-- pH Visualization -->
-              <div class="visualization-card">
-                <h2>Fermentation Status</h2>
-                <div class="ph-container">
-                  <div class="ph-meter">
-                    <div class="ph-scale">
-                      <div class="ph-indicator" :style="{ left: `${((tree2PH - 2) / (5.75 - 2)) * 100}%` }">
-                        <div class="ph-value">pH {{ tree2PH }}</div>
-                      </div>
-                      <div class="ph-labels">
-                        <span>Vinegar (pH 2)</span>
-                        <span>Tuba (pH 5.75)</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="fermentation-status" :class="getTree2FermentationStatus().toLowerCase()">
-                    Current Status: {{ getTree2FermentationStatus() }}
-                  </div>
-                </div>
-              </div>
-
-              <!-- pH Statistics -->
-              <div class="data-card">
-                <h2>Fermentation Analysis</h2>
-                <div class="stats-grid">
-                  <div class="stat-item">
-                    <span class="stat-label">Current pH</span>
-                    <span class="stat-value">{{ tree2PH }}</span>
-                  </div>
-                  <div class="stat-item">
-                    <span class="stat-label">Status</span>
-                    <span class="stat-value" :class="getTree2FermentationStatus().toLowerCase()">
-                      {{ getTree2FermentationStatus() }}
-                    </span>
-                  </div>
-                  <div class="stat-item">
-                    <span class="stat-label">Last Reading</span>
-                    <span class="stat-value">{{ tree2LastUpdated }}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div class="chart-card">
-                <h2>pH Level History</h2>
-                <div class="chart-container">
-                  <div class="history-chart">
-                    <div class="chart-lines">
-                      <!-- Horizontal grid lines for pH (2 to 5.75, every 0.5) -->
-                      <div v-for="n in 8" :key="n" class="chart-grid-line"
-                           :style="{ bottom: `${(((2 + (n - 1) * 0.5) - 2) / (5.75 - 2)) * 100}%` }"></div>
-                      <div v-for="(point, index) in tree2PHHistory" 
-                           :key="index" 
-                           class="chart-point"
-                           :style="{
-                             left: `${(index / (tree2PHHistory.length - 1 || 1)) * 100}%`,
-                             bottom: `${((point.pH - 2) / (5.75 - 2) * 100)}%`
-                           }">
-                      </div>
-                    </div>
-                    <div class="chart-labels">
-                      <div class="y-axis">
-                        <span>5.75</span>
-                        <span>2</span>
-                      </div>
-                      <div class="x-axis">
-                        <span>{{ tree2PHHistory.length > 0 ? formatTimestamp(tree2PHHistory[tree2PHHistory.length - 1]?.timestamp) : 'No data' }}</span>
-                        <span>{{ tree2PHHistory.length > 0 ? formatTimestamp(tree2PHHistory[0]?.timestamp) : 'No data' }}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <PHStatus
+                :ph="tree2PH"
+                :last-updated="tree2LastUpdated"
+                :history="tree2PHHistory"
+                :format-timestamp="formatTimestamp"
+              />
             </div>
           </div>
 
@@ -776,6 +644,7 @@
   .content-grid {
     grid-template-columns: repeat(2, 1fr);
     max-width: 800px;
+    gap: 48px;
   }
 }
 
@@ -783,10 +652,13 @@
   .content-grid {
     grid-template-columns: 1fr;
     max-width: 600px;
+    gap: 32px;
   }
   
-  .visualization-card, .data-card, .chart-card {
-    padding: 30px;
+  .visualization-card, 
+  .data-card, 
+  .chart-card {
+    padding: 24px;
   }
 }
 
@@ -819,11 +691,13 @@
   }
 
   .content-grid {
-    padding: 16px 0;
     gap: 20px;
+    padding: 16px 0;
   }
 
-  .visualization-card, .data-card, .chart-card {
+  .visualization-card, 
+  .data-card, 
+  .chart-card {
     padding: 20px;
   }
 }
@@ -850,7 +724,6 @@
   width: 100%;
   max-width: 1000px;
   margin: 0 auto;
-  justify-items: center;
 }
 
 .chart-card {
@@ -959,104 +832,18 @@
   }
 }
 
-.ph-container {
-  padding: 20px;
-}
-
-.ph-meter {
-  margin: 40px 0;
-  position: relative;
-  padding-bottom: 20px;
-}
-
-.ph-scale {
-  height: 60px;
-  background: linear-gradient(to right, #ff4444, #ffae00, #44ff44);
-  border-radius: 30px;
-  position: relative;
-  margin: 40px 20px 60px;
-}
-
-.ph-indicator {
-  position: absolute;
-  top: -25px;
-  width: 20px;
-  height: 80px;
-  transform: translateX(-50%);
-  transition: left 0.5s ease-out;
-}
-
-.ph-indicator::after {
-  content: '';
-  position: absolute;
-  top: 25px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 4px;
-  height: 55px;
-  background-color: #2c3e50;
-}
-
-.ph-value {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: #2c3e50;
-  color: white;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 0.9em;
-  white-space: nowrap;
-  z-index: 2;
-}
-
-.ph-labels {
-  display: flex;
-  justify-content: space-between;
-  position: absolute;
-  width: 100%;
-  bottom: -40px;
-  left: 0;
-  color: #666;
-  font-size: 0.9em;
-}
-
-.ph-labels span {
-  transform: translateX(-50%);
-}
-
-.ph-labels span:last-child {
-  transform: translateX(50%);
-}
-
-.fermentation-status {
-  text-align: center;
-  font-size: 1.2em;
-  font-weight: bold;
-  margin: 20px 0;
-  padding: 10px;
-  border-radius: 5px;
-}
-
-.fermentation-status.fresh {
-  color: #27ae60;
-  background-color: rgba(39, 174, 96, 0.1);
-}
-
-.fermentation-status.fermenting {
-  color: #f39c12;
-  background-color: rgba(243, 156, 18, 0.1);
-}
-
-.fermentation-status.nearly {
-  color: #e67e22;
-  background-color: rgba(230, 126, 34, 0.1);
-}
-
+.ph-container,
+.ph-meter,
+.ph-scale,
+.ph-indicator,
+.ph-value,
+.ph-labels,
+.fermentation-status,
+.fermentation-status.fresh,
+.fermentation-status.fermenting,
+.fermentation-status.nearly,
 .fermentation-status.vinegar {
-  color: #e74c3c;
-  background-color: rgba(231, 76, 60, 0.1);
+  display: none;
 }
 
 .stats-grid {
@@ -1542,15 +1329,8 @@
 
 /* Add animation for gradient */
 @keyframes gradient {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
 }
 
 .sidebar-overlay {
@@ -1627,7 +1407,6 @@
   height: calc(100% - 40px);
   border-left: 1px solid #ddd;
   border-bottom: 1px solid #ddd;
-  margin-left: 0;
 }
 
 .chart-point {
@@ -1761,13 +1540,15 @@ import {
 } from '../firebase';
 import SensorData from './SensorData.vue';
 import ContainerStatus from './ContainerStatus.vue';
+import PHStatus from './PHStatus.vue';
 import { watch } from 'vue';
 
 export default {
   name: 'Dashboard',
   components: {
     SensorData,
-    ContainerStatus
+    ContainerStatus,
+    PHStatus
   },
   data() {
     return {
@@ -1780,13 +1561,7 @@ export default {
       showSidebar: false,
       notificationIcon: '📊',
       notificationMessage: '',
-      showNotification: false,
-      isValveOpen: false,
-      isValveLoading: false,
-      valveControlDoc: null,
-      valveUpdateLock: false,
-      manualOverride: false,
-      lastValveUpdate: null
+      showNotification: false
     }
   },
   setup() {
@@ -1809,19 +1584,6 @@ export default {
       tree1TempHistory,
       tree2TempHistory
     } = SensorData.setup();
-
-    // Add watchers to debug pH values
-    watch(tree1PH, (newValue) => {
-      console.log('Dashboard: tree1PH changed to:', newValue);
-    });
-
-    watch(tree2PH, (newValue) => {
-      console.log('Dashboard: tree2PH changed to:', newValue);
-    });
-
-    watch(tree1PHHistory, (newValue) => {
-      console.log('Dashboard: tree1PHHistory updated:', newValue);
-    }, { deep: true });
 
     return {
       tree1Level,
@@ -1859,18 +1621,6 @@ export default {
       if (window.innerWidth <= 768) {
         this.showSidebar = false;
       }
-    },
-    getTree1FermentationStatus() {
-      return this.getFermentationStatus(this.tree1PH);
-    },
-    getTree2FermentationStatus() {
-      return this.getFermentationStatus(this.tree2PH);
-    },
-    getFermentationStatus(ph) {
-      if (ph >= 5) return 'Fresh Tuba';
-      if (ph >= 4) return 'Fermenting';
-      if (ph >= 3) return 'Nearly Vinegar';
-      return 'Vinegar';
     },
     logout() {
       this.showProfileMenu = false;

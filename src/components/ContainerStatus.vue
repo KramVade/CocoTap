@@ -150,12 +150,9 @@ export default {
         this.containerUnsubscribe = onSnapshot(q, (querySnapshot) => {
           querySnapshot.forEach((doc) => {
             const data = doc.data();
-            console.log('Firestore data:', data);
             this.level = data.volume_liters || 0;
             this.timestamp = data.timestamp || '';
-            console.log('Set timestamp:', this.timestamp);
             
-            // Check container level for valve control
             if (this.$refs.valveControl) {
               this.$refs.valveControl.checkContainerLevel(this.level, this.containerCapacity);
             }
@@ -189,7 +186,6 @@ export default {
   beforeUnmount() {
     if (this.containerUnsubscribe) {
       this.containerUnsubscribe();
-      console.log('Unsubscribed from container listener');
     }
   }
 }
@@ -203,8 +199,7 @@ export default {
 .cards-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(520px, 1fr));
-  column-gap: 48px;
-  row-gap: -10px;
+  gap: 48px;
   width: 100%;
   max-width: 1700px;
   margin: 0 auto;

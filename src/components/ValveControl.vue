@@ -53,26 +53,16 @@ export default {
         const newState = !this.isValveOpen;
         const timestamp = new Date().toISOString();
         
-        if (this.valveUpdateLock) {
-          console.log('Ignoring valve state change due to lock');
-          return;
-        }
+        if (this.valveUpdateLock) return;
         
         this.valveUpdateLock = true;
-        
         const valveRef = doc(firestore, 'control', 'valve');
         
         await setDoc(valveRef, {
           fields: {
-            valveState: {
-              booleanValue: newState
-            },
-            lastUpdated: {
-              timestampValue: timestamp
-            },
-            manualOverride: {
-              booleanValue: newState !== this.isValveOpen
-            }
+            valveState: { booleanValue: newState },
+            lastUpdated: { timestampValue: timestamp },
+            manualOverride: { booleanValue: newState !== this.isValveOpen }
           }
         }, { merge: true });
         
@@ -92,10 +82,7 @@ export default {
         });
       } finally {
         this.isValveLoading = false;
-        setTimeout(() => {
-          this.valveUpdateLock = false;
-          console.log('Valve update lock released');
-        }, 1000);
+        setTimeout(() => this.valveUpdateLock = false, 1000);
       }
     },
     async initializeValveControl() {
@@ -105,39 +92,27 @@ export default {
         const valveRef = doc(firestore, 'control', 'valve');
         await setDoc(valveRef, {
           fields: {
-            valveState: {
-              booleanValue: false
-            },
-            lastUpdated: {
-              timestampValue: new Date().toISOString()
-            },
-            manualOverride: {
-              booleanValue: false
-            }
+            valveState: { booleanValue: false },
+            lastUpdated: { timestampValue: new Date().toISOString() },
+            manualOverride: { booleanValue: false }
           }
         }, { merge: true });
 
         this.valveUnsubscribe = onSnapshot(valveRef, (doc) => {
-          if (doc.exists()) {
-            const data = doc.data();
-            const newTimestamp = data.fields?.lastUpdated?.timestampValue;
+          if (!doc.exists()) return;
+          
+          const data = doc.data();
+          const newTimestamp = data.fields?.lastUpdated?.timestampValue;
 
-            if (this.lastValveUpdate && newTimestamp < this.lastValveUpdate) {
-              console.log('Ignoring older valve state change');
-              return;
-            }
-            if (this.valveUpdateLock) {
-              console.log('Ignoring valve state change due to lock');
-              return;
-            }
+          if (this.lastValveUpdate && newTimestamp < this.lastValveUpdate) return;
+          if (this.valveUpdateLock) return;
 
-            const newState = data.fields?.valveState?.booleanValue ?? false;
-            const newManualOverride = data.fields?.manualOverride?.booleanValue ?? false;
+          const newState = data.fields?.valveState?.booleanValue ?? false;
+          const newManualOverride = data.fields?.manualOverride?.booleanValue ?? false;
 
-            this.isValveOpen = newState;
-            this.manualOverride = newManualOverride;
-            this.lastValveUpdate = newTimestamp;
-          }
+          this.isValveOpen = newState;
+          this.manualOverride = newManualOverride;
+          this.lastValveUpdate = newTimestamp;
         });
       } catch (error) {
         console.error('Error initializing valve control:', error);
@@ -171,7 +146,6 @@ export default {
   beforeUnmount() {
     if (this.valveUnsubscribe) {
       this.valveUnsubscribe();
-      console.log('Unsubscribed from valve listener');
     }
   }
 }
@@ -242,7 +216,6 @@ export default {
 }
 
 .loading-spinner {
-  display: inline-block;
   width: 16px;
   height: 16px;
   border: 2px solid #f3f3f3;
