@@ -11,7 +11,8 @@ import {
   query, 
   orderBy,
   setDoc,
-  addDoc
+  addDoc,
+  limit
 } from 'firebase/firestore';
 import { VueFire, useFirestore, useDatabase } from 'vuefire';
 
@@ -55,5 +56,6 @@ export {
     query,
     orderBy,
     setDoc,
-    addDoc
+    addDoc,
+    limit
 };

@@ -174,98 +174,14 @@
               <h2>Tree 1 - Container Status</h2>
             </div>
             <div class="content-grid">
-              <!-- Container Visualization -->
-              <div class="visualization-card">
-                <h2>Container Status</h2>
-                <div class="bottle-container">
-                  <div class="bottle">
-                    <div class="bottle-cap"></div>
-                    <div class="bottle-body">
-                      <div class="bottle-fill" :style="{ height: `${(tree1Level / containerCapacity) * 100}%` }">
-                        <div class="bubbles">
-                          <span></span>
-                          <span></span>
-                          <span></span>
-                          <span></span>
-                          <span></span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="level-indicator">{{ tree1Level }}L</div>
-                </div>
-              </div>
-
-              <!-- Container Statistics -->
-              <div class="data-card">
-                <h2>Container Statistics</h2>
-                <div class="stats-grid">
-                  <div class="stat-item">
-                    <span class="stat-label">Current Level</span>
-                    <span class="stat-value">{{ tree1Level }}L</span>
-                  </div>
-                  <div class="stat-item">
-                    <span class="stat-label">Maximum Capacity</span>
-                    <span class="stat-value">{{ containerCapacity }}L</span>
-                  </div>
-                  <div class="stat-item">
-                    <span class="stat-label">Fill Percentage</span>
-                    <span class="stat-value">{{ ((tree1Level / containerCapacity) * 100).toFixed(1) }}%</span>
-                  </div>
-                  <div class="stat-item">
-                    <span class="stat-label">Last Updated</span>
-                    <span class="stat-value">{{ tree1LastUpdated }}</span>
-                  </div>
-                  <div class="stat-item valve-control">
-                    <span class="stat-label">Valve Status</span>
-                    <div class="valve-status-group">
-                      <span class="stat-value" :class="{ 'active': isValveOpen }">
-                        {{ isValveOpen ? 'Open' : 'Closed' }}
-                      </span>
-                      <button 
-                        class="valve-toggle-btn" 
-                        :class="{ 'active': isValveOpen }"
-                        @click="toggleValve"
-                        :disabled="isValveLoading"
-                      >
-                        <span v-if="isValveLoading" class="loading-spinner"></span>
-                        <span v-else>{{ isValveOpen ? 'Close Valve' : 'Open Valve' }}</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="chart-card">
-                <h2>Content Level History</h2>
-                <div class="chart-container">
-                  <div class="history-chart">
-                    <div class="chart-lines">
-                      <!-- Horizontal grid lines for content level -->
-                      <div v-for="n in Math.max(containerCapacity, 1)" :key="n" class="chart-grid-line"
-                           :style="{ bottom: `${(n / containerCapacity) * 100}%` }"></div>
-                      <div v-for="(point, index) in tree1History" 
-                           :key="index" 
-                           class="chart-point"
-                           :style="{
-                             left: `${(index / (tree1History.length - 1 || 1)) * 100}%`,
-                             bottom: `${(point.level / containerCapacity) * 100}%`
-                           }">
-                      </div>
-                    </div>
-                    <div class="chart-labels">
-                      <div class="y-axis">
-                        <span>{{ containerCapacity }}L</span>
-                        <span>0L</span>
-                      </div>
-                      <div class="x-axis">
-                        <span>{{ tree1History.length > 0 ? formatTimestamp(tree1History[tree1History.length - 1]?.timestamp) : 'No data' }}</span>
-                        <span>{{ tree1History.length > 0 ? formatTimestamp(tree1History[0]?.timestamp) : 'No data' }}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <ContainerStatus
+                :level="tree1Level"
+                :container-capacity="containerCapacity"
+                :last-updated="tree1LastUpdated"
+                :history="tree1History"
+                :show-valve-control="true"
+                @valve-toggled="handleValveToggle"
+              />
             </div>
           </div>
 
@@ -356,81 +272,13 @@
               <h2>Tree 2 - Container Status</h2>
             </div>
             <div class="content-grid">
-              <!-- Container Visualization -->
-              <div class="visualization-card">
-                <h2>Container Status</h2>
-                <div class="bottle-container">
-                  <div class="bottle">
-                    <div class="bottle-cap"></div>
-                    <div class="bottle-body">
-                      <div class="bottle-fill" :style="{ height: `${(tree2Level / containerCapacity) * 100}%` }">
-                        <div class="bubbles">
-                          <span></span>
-                          <span></span>
-                          <span></span>
-                          <span></span>
-                          <span></span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="level-indicator">{{ tree2Level }}L</div>
-                </div>
-              </div>
-
-              <!-- Container Statistics -->
-              <div class="data-card">
-                <h2>Container Statistics</h2>
-                <div class="stats-grid">
-                  <div class="stat-item">
-                    <span class="stat-label">Current Level</span>
-                    <span class="stat-value">{{ tree2Level }}L</span>
-                  </div>
-                  <div class="stat-item">
-                    <span class="stat-label">Maximum Capacity</span>
-                    <span class="stat-value">{{ containerCapacity }}L</span>
-                  </div>
-                  <div class="stat-item">
-                    <span class="stat-label">Fill Percentage</span>
-                    <span class="stat-value">{{ ((tree2Level / containerCapacity) * 100).toFixed(1) }}%</span>
-                  </div>
-                  <div class="stat-item">
-                    <span class="stat-label">Last Updated</span>
-                    <span class="stat-value">{{ tree2LastUpdated }}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div class="chart-card">
-                <h2>Content Level History</h2>
-                <div class="chart-container">
-                  <div class="history-chart">
-                    <div class="chart-lines">
-                      <!-- Horizontal grid lines for content level -->
-                      <div v-for="n in Math.max(containerCapacity, 1)" :key="n" class="chart-grid-line"
-                           :style="{ bottom: `${(n / containerCapacity) * 100}%` }"></div>
-                      <div v-for="(point, index) in tree2History" 
-                           :key="index" 
-                           class="chart-point"
-                           :style="{
-                             left: `${(index / (tree2History.length - 1 || 1)) * 100}%`,
-                             bottom: `${(point.level / containerCapacity) * 100}%`
-                           }">
-                      </div>
-                    </div>
-                    <div class="chart-labels">
-                      <div class="y-axis">
-                        <span>{{ containerCapacity }}L</span>
-                        <span>0L</span>
-                      </div>
-                      <div class="x-axis">
-                        <span>{{ tree2History.length > 0 ? formatTimestamp(tree2History[tree2History.length - 1]?.timestamp) : 'No data' }}</span>
-                        <span>{{ tree2History.length > 0 ? formatTimestamp(tree2History[0]?.timestamp) : 'No data' }}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <ContainerStatus
+                :level="tree2Level"
+                :container-capacity="containerCapacity"
+                :last-updated="tree2LastUpdated"
+                :history="tree2History"
+                :show-valve-control="false"
+              />
             </div>
           </div>
 
@@ -1912,12 +1760,14 @@ import {
   getDoc
 } from '../firebase';
 import SensorData from './SensorData.vue';
+import ContainerStatus from './ContainerStatus.vue';
 import { watch } from 'vue';
 
 export default {
   name: 'Dashboard',
   components: {
-    SensorData
+    SensorData,
+    ContainerStatus
   },
   data() {
     return {
@@ -2103,133 +1953,12 @@ export default {
         sidebar.classList.toggle('show');
       }
     },
-    async toggleValve() {
-      if (this.isValveLoading) return;
-      
-      this.isValveLoading = true;
-      try {
-        const newState = !this.isValveOpen;
-        const timestamp = new Date().toISOString();
-        
-        // Check if we're already processing an update
-        if (this.valveUpdateLock) {
-          console.log('Ignoring valve state change due to lock');
-          return;
-        }
-        
-        // Set the lock
-        this.valveUpdateLock = true;
-        
-        const valveRef = doc(firestore, 'control', 'valve');
-        
-        // Update the valve state with timestamp and manual override status
-        await setDoc(valveRef, {
-          fields: {
-            valveState: {
-              booleanValue: newState
-            },
-            lastUpdated: {
-              timestampValue: timestamp
-            },
-            manualOverride: {
-              booleanValue: newState !== this.isValveOpen // Set manual override when state changes
-            }
-          }
-        }, { merge: true });
-        
-        this.isValveOpen = newState;
-        this.lastValveUpdate = timestamp;
-        this.manualOverride = newState !== this.isValveOpen;
-        
-        this.showSuccessMessage(`Valve ${newState ? 'opened' : 'closed'} successfully`);
-      } catch (error) {
-        console.error('Error toggling valve:', error);
-        this.showErrorMessage('Failed to control valve. Please try again.');
-      } finally {
-        this.isValveLoading = false;
-        // Release the lock after a short delay to prevent race conditions
-        setTimeout(() => {
-          this.valveUpdateLock = false;
-          console.log('Valve update lock released');
-        }, 1000);
+    handleValveToggle(result) {
+      if (result.success) {
+        this.showSuccessMessage(result.message);
+      } else {
+        this.showErrorMessage(result.message);
       }
-    },
-    async initializeValveControl() {
-      try {
-        const valveRef = doc(firestore, 'control', 'valve');
-        const valveDoc = await getDoc(valveRef);
-        
-        // Always ensure valve starts closed on initialization
-        await setDoc(valveRef, {
-          fields: {
-            valveState: {
-              booleanValue: false
-            },
-            lastUpdated: {
-              timestampValue: new Date().toISOString()
-            },
-            manualOverride: {
-              booleanValue: false
-            }
-          }
-        }, { merge: true });
-        
-        this.isValveOpen = false;
-        this.manualOverride = false;
-        this.lastValveUpdate = new Date().toISOString();
-        
-        this.valveControlDoc = valveRef;
-        
-        // Listen for valve state changes
-        onSnapshot(valveRef, (doc) => {
-          if (doc.exists()) {
-            const data = doc.data();
-            const newTimestamp = data.fields?.lastUpdated?.timestampValue;
-            
-            // Ignore older updates
-            if (this.lastValveUpdate && newTimestamp < this.lastValveUpdate) {
-              console.log('Ignoring older valve state change');
-              return;
-            }
-            
-            // Check if we're currently processing an update
-            if (this.valveUpdateLock) {
-              console.log('Ignoring valve state change due to lock');
-              return;
-            }
-            
-            const newState = data.fields?.valveState?.booleanValue ?? false;
-            const newManualOverride = data.fields?.manualOverride?.booleanValue ?? false;
-            
-            this.isValveOpen = newState;
-            this.manualOverride = newManualOverride;
-            this.lastValveUpdate = newTimestamp;
-          }
-        });
-      } catch (error) {
-        console.error('Error initializing valve control:', error);
-        this.isValveOpen = false;
-        this.manualOverride = false;
-      }
-    },
-    checkContainerLevel() {
-      // Don't auto-control valve if manual override is active
-      if (this.manualOverride) return;
-      
-      const fillPercentage = (this.tree1Level / this.containerCapacity) * 100;
-      if (fillPercentage >= 90 && !this.isValveOpen) {
-        this.toggleValve();
-      } else if (fillPercentage < 90 && this.isValveOpen) {
-        this.toggleValve();
-      }
-    }
-  },
-  watch: {
-    tree1Level: {
-      handler(newLevel) {
-        this.checkContainerLevel();
-      },
-      immediate: true
     }
   },
   mounted() {
@@ -2244,8 +1973,6 @@ export default {
     this.authUnsubscribe = auth.onAuthStateChanged((firebaseUser) => {
       this.updateUserData(firebaseUser);
     });
-
-    this.initializeValveControl();
   },
   beforeUnmount() {
     if (this.authUnsubscribe) {
