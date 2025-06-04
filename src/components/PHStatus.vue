@@ -37,7 +37,7 @@
             </span>
           </div>
           <div class="stat-item">
-            <span class="stat-label">Last Reading</span>
+            <span class="stat-label">Last Updated</span>
             <span class="stat-value">{{ lastUpdated }}</span>
           </div>
         </div>

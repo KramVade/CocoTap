@@ -237,84 +237,12 @@
               <h2>Bottle 1 - Temperature</h2>
             </div>
             <div class="content-grid">
-              <!-- Temperature Visualization -->
-              <div class="visualization-card">
-                <h2>Temperature Status</h2>
-                <div class="temperature-container">
-                  <div class="thermometer">
-                    <div class="thermometer-body">
-                      <div 
-                        class="temperature-fill" 
-                        :style="{ 
-                          height: `${((tree1Temp - 20) / (35 - 20)) * 100}%`,
-                          backgroundColor: getTemperatureColor(tree1Temp)
-                        }"
-                      ></div>
-                    </div>
-                    <div class="temperature-value">{{ tree1Temp }}°C</div>
-                  </div>
-                  <div class="temperature-scale">
-                    <span>35°C</span>
-                    <span>20°C</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Temperature Statistics -->
-              <div class="data-card">
-                <h2>Temperature Analysis</h2>
-                <div class="stats-grid">
-                  <div class="stat-item">
-                    <span class="stat-label">Current Temperature</span>
-                    <span class="stat-value">{{ tree1Temp }}°C</span>
-                  </div>
-                  <div class="stat-item">
-                    <span class="stat-label">Status</span>
-                    <span class="stat-value" :class="getTemperatureStatus(tree1Temp).toLowerCase()">
-                      {{ getTemperatureStatus(tree1Temp) }}
-                    </span>
-                  </div>
-                  <div class="stat-item">
-                    <span class="stat-label">Optimal Range</span>
-                    <span class="stat-value">25°C - 30°C</span>
-                  </div>
-                  <div class="stat-item">
-                    <span class="stat-label">Last Updated</span>
-                    <span class="stat-value">{{ lastTemperatureReading ? formatDate(lastTemperatureReading.timestamp) : 'N/A' }}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div class="chart-card">
-                <h2>Temperature History</h2>
-                <div class="chart-container">
-                  <div class="history-chart">
-                    <div class="chart-lines">
-                      <!-- Horizontal grid lines for temperature (20°C to 35°C, every 3°C) -->
-                      <div v-for="n in 6" :key="n" class="chart-grid-line"
-                           :style="{ bottom: `${(((20 + (n - 1) * 3) - 20) / (35 - 20)) * 100}%` }"></div>
-                      <div v-for="(point, index) in tree1TempHistory" 
-                           :key="index" 
-                           class="chart-point"
-                           :style="{
-                             left: `${(index / (tree1TempHistory.length - 1 || 1)) * 100}%`,
-                             bottom: `${((point.temp - 20) / (35 - 20) * 100)}%`
-                           }">
-                      </div>
-                    </div>
-                    <div class="chart-labels">
-                      <div class="y-axis">
-                        <span>35°C</span>
-                        <span>20°C</span>
-                      </div>
-                      <div class="x-axis">
-                        <span>{{ tree1TempHistory.length > 0 ? formatTimestamp(tree1TempHistory[tree1TempHistory.length - 1]?.timestamp) : 'No data' }}</span>
-                        <span>{{ tree1TempHistory.length > 0 ? formatTimestamp(tree1TempHistory[0]?.timestamp) : 'No data' }}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <TemperatureStatus
+                :temperature="tree1Temp"
+                :last-updated="tree1LastUpdated"
+                :history="tree1TempHistory"
+                :format-timestamp="formatTimestamp"
+              />
             </div>
           </div>
 
@@ -324,84 +252,12 @@
               <h1>Bottle 2 - Temperature</h1>
             </div>
             <div class="content-grid">
-              <!-- Temperature Visualization -->
-              <div class="visualization-card">
-                <h2>Temperature Status</h2>
-                <div class="temperature-container">
-                  <div class="thermometer">
-                    <div class="thermometer-body">
-                      <div 
-                        class="temperature-fill" 
-                        :style="{ 
-                          height: `${((tree2Temp - 20) / (35 - 20)) * 100}%`,
-                          backgroundColor: getTemperatureColor(tree2Temp)
-                        }"
-                      ></div>
-                    </div>
-                    <div class="temperature-value">{{ tree2Temp }}°C</div>
-                  </div>
-                  <div class="temperature-scale">
-                    <span>35°C</span>
-                    <span>20°C</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Temperature Statistics -->
-              <div class="data-card">
-                <h2>Temperature Analysis</h2>
-                <div class="stats-grid">
-                  <div class="stat-item">
-                    <span class="stat-label">Current Temperature</span>
-                    <span class="stat-value">{{ tree2Temp }}°C</span>
-                  </div>
-                  <div class="stat-item">
-                    <span class="stat-label">Status</span>
-                    <span class="stat-value" :class="getTemperatureStatus(tree2Temp).toLowerCase()">
-                      {{ getTemperatureStatus(tree2Temp) }}
-                    </span>
-                  </div>
-                  <div class="stat-item">
-                    <span class="stat-label">Optimal Range</span>
-                    <span class="stat-value">25°C - 30°C</span>
-                  </div>
-                  <div class="stat-item">
-                    <span class="stat-label">Last Updated</span>
-                    <span class="stat-value">{{ tree2LastUpdated }}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div class="chart-card">
-                <h2>Temperature History</h2>
-                <div class="chart-container">
-                  <div class="history-chart">
-                    <div class="chart-lines">
-                      <!-- Horizontal grid lines for temperature (20°C to 35°C, every 3°C) -->
-                      <div v-for="n in 6" :key="n" class="chart-grid-line"
-                           :style="{ bottom: `${(((20 + (n - 1) * 3) - 20) / (35 - 20)) * 100}%` }"></div>
-                      <div v-for="(point, index) in tree2TempHistory" 
-                           :key="index" 
-                           class="chart-point"
-                           :style="{
-                             left: `${(index / (tree2TempHistory.length - 1 || 1)) * 100}%`,
-                             bottom: `${((point.temp - 20) / (35 - 20) * 100)}%`
-                           }">
-                      </div>
-                    </div>
-                    <div class="chart-labels">
-                      <div class="y-axis">
-                        <span>35°C</span>
-                        <span>20°C</span>
-                      </div>
-                      <div class="x-axis">
-                        <span>{{ tree2TempHistory.length > 0 ? formatTimestamp(tree2TempHistory[tree2TempHistory.length - 1]?.timestamp) : 'No data' }}</span>
-                        <span>{{ tree2TempHistory.length > 0 ? formatTimestamp(tree2TempHistory[0]?.timestamp) : 'No data' }}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <TemperatureStatus
+                :temperature="tree2Temp"
+                :last-updated="tree2LastUpdated"
+                :history="tree2TempHistory"
+                :format-timestamp="formatTimestamp"
+              />
             </div>
           </div>
         </div>
@@ -1541,6 +1397,7 @@ import {
 import SensorData from './SensorData.vue';
 import ContainerStatus from './ContainerStatus.vue';
 import PHStatus from './PHStatus.vue';
+import TemperatureStatus from './TemperatureStatus.vue';
 import { watch } from 'vue';
 
 export default {
@@ -1548,7 +1405,8 @@ export default {
   components: {
     SensorData,
     ContainerStatus,
-    PHStatus
+    PHStatus,
+    TemperatureStatus
   },
   data() {
     return {

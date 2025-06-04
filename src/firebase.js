@@ -1,6 +1,13 @@
 import { initializeApp } from 'firebase/app'; 
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth'; 
-import { getDatabase, ref, set, onValue, push } from 'firebase/database';
+import { 
+  getAuth, 
+  GoogleAuthProvider, 
+  signInWithRedirect, 
+  getRedirectResult,
+  signInWithPopup,
+  signOut, 
+  onAuthStateChanged 
+} from 'firebase/auth'; 
 import { 
   getFirestore, 
   collection, 
@@ -14,39 +21,37 @@ import {
   addDoc,
   limit
 } from 'firebase/firestore';
-import { VueFire, useFirestore, useDatabase } from 'vuefire';
 
 const firebaseConfig = {
-    apiKey: "AIzaSyAz4Ii6pA4HsxbmffFAE3-5Kh8tTNz-sAs",
-    authDomain: "cocotap-963b5.firebaseapp.com",
-    projectId: "cocotap-963b5",
-    storageBucket: "cocotap-963b5.appspot.com",
-    messagingSenderId: "1065918197117",
-    appId: "1:1065918197117:web:f99657a44023211038f014",
-    measurementId: "G-DFJK0T1S2T",
-    databaseURL: "https://cocotap-963b5-default-rtdb.firebaseio.com"
+  apiKey: "AIzaSyBIe4_kxZRUE7mjOXdQUR--Megbah4alwE",
+  authDomain: "cocotap-7d09a.firebaseapp.com",
+  projectId: "cocotap-7d09a",
+  storageBucket: "cocotap-7d09a.appspot.com",
+  messagingSenderId: "649138599029",
+  appId: "1:649138599029:web:718be14d2a95c1b7e5743c",
+  measurementId: "G-TS9EZDMVQK"
 };
 
 const app = initializeApp(firebaseConfig); 
 const auth = getAuth(app); 
 const provider = new GoogleAuthProvider();
-const database = getDatabase(app);
+
+// Configure Google Auth Provider
+provider.setCustomParameters({
+  prompt: 'select_account'
+});
+
 const firestore = getFirestore(app);
 
 export { 
     app,
     auth, 
     provider, 
-    signInWithPopup, 
+    signInWithRedirect,
+    getRedirectResult,
+    signInWithPopup,
     signOut, 
     onAuthStateChanged,
-    database,
-    ref,
-    set,
-    onValue,
-    push,
-    VueFire,
-    useDatabase,
     firestore,
     collection,
     doc,
@@ -59,3 +64,8 @@ export {
     addDoc,
     limit
 };
+
+async function handleGoogleLogin() {
+  console.log('Login button clicked');
+  // ...rest of your code
+}

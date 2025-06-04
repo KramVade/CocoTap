@@ -4,7 +4,10 @@
     <div class="landing-container">
       <!-- Login button in top right -->
       <div class="login-button-container">
-        <button v-if="!user" @click="handleGoogleLogin" class="login-button">
+        <div v-if="isOffline" class="offline-indicator">
+          You are currently offline. Please check your internet connection.
+        </div>
+        <button v-if="!user" @click="handleGoogleLogin" class="login-button" :disabled="isOffline">
           <img src="../assets/google-icon.svg" alt="Google" class="google-icon">
           Login with Google
         </button>
@@ -63,38 +66,50 @@
 </template>
 
 <script>
-import { auth, provider, signInWithPopup, signOut, onAuthStateChanged } from '../firebase';
-import { getFirestore, doc, getDoc, setDoc } from 'firebase/firestore';
-
-const db = getFirestore();
+import { auth, provider, signInWithPopup, signOut, onAuthStateChanged, getRedirectResult, firestore } from '../firebase';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 export default {
   name: 'Login',
   data() {
     return {
       user: null,
-      errorMessage: ''
+      errorMessage: '',
+      isOffline: false,
+      connectionState: 'unknown',
+      retryCount: 0,
+      maxRetries: 3,
+      isLoading: false
     };
   },
   methods: {
     async handleGoogleLogin() {
       try {
-        const result = await signInWithPopup(auth, provider);
-        const user = result.user;
-        const userRef = doc(db, 'users', user.uid);
-        const userSnap = await getDoc(userRef);
-
-        if (!userSnap.exists()) {
-          await setDoc(userRef, { createdAt: new Date().toISOString() });
-        }
-
-        this.user = user;
-        this.$router.push('/dashboard');
+        this.errorMessage = '';
+        this.isLoading = true;
+        await signInWithPopup(auth, provider);
       } catch (error) {
         console.error('Login error:', error);
-        this.errorMessage = 'Login failed. Please try again.';
+        this.errorMessage = `Login failed: ${error.message}. Please try again.`;
+        this.isLoading = false;
       }
     },
+
+    async handleRedirectResult() {
+  try {
+    const result = await getRedirectResult(auth);
+    if (result && result.user) {
+      this.user = result.user;
+      this.$router.push('/dashboard'); // 🔁 Move it here
+    }
+  } catch (error) {
+    console.error('Redirect result error:', error);
+    this.errorMessage = `Login failed: ${error.message}. Please try again.`;
+  } finally {
+    this.isLoading = false;
+  }
+},
+
 
     async logout() {
       try {
@@ -110,17 +125,18 @@ export default {
       this.$router.push('/dashboard');
     }
   },
-  created() {
-    onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        const userRef = doc(db, 'users', firebaseUser.uid);
-        const userSnap = await getDoc(userRef);
+  async created() {
+    // Handle redirect result
+    await this.handleRedirectResult();
 
-        if (userSnap.exists()) {
-          this.user = firebaseUser;
+    // Set up auth state listener
+    onAuthStateChanged(auth, (firebaseUser) => {
+      console.log('Auth state changed:', firebaseUser);
+      if (firebaseUser) {
+        this.user = firebaseUser;
+        if (this.$route.path !== '/dashboard') {
+          console.log('Redirecting to dashboard!');
           this.$router.push('/dashboard');
-        } else {
-          await signOut(auth);
         }
       } else {
         this.user = null;
@@ -318,6 +334,20 @@ export default {
   max-width: 400px;
   margin-left: auto;
   margin-right: auto;
+}
+.offline-indicator {
+  background-color: #ff5252;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  font-size: 0.9em;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.login-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 @media (max-width: 700px) {
   .content-container {

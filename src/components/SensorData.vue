@@ -29,7 +29,7 @@ const useSensorData = () => {
   const tree2LastUpdated = ref('');
   
   const lastTemperatureReading = ref(null);
-  const containerCapacity = ref(7);
+  const containerCapacity = ref(2);
 
   // Add historical data storage
   const tree1History = ref([]);
@@ -102,13 +102,12 @@ const useSensorData = () => {
         tree1PHHistory.value = tree1PHHistory.value.slice(0, maxHistoryPoints);
       }
     }
-    if (temp !== undefined) {
-      const newTemp = typeof temp === 'object' ? Number(temp.doubleValue) : Number(temp);
-      tree1Temp.value = newTemp;
+    if (temp !== undefined && typeof temp === 'number' && !isNaN(temp)) {
+      tree1Temp.value = temp;
       
       // Add to temperature history
       tree1TempHistory.value.unshift({
-        temp: newTemp,
+        temp: temp,
         timestamp: new Date().toISOString()
       });
       
@@ -150,13 +149,12 @@ const useSensorData = () => {
         tree2PHHistory.value = tree2PHHistory.value.slice(0, maxHistoryPoints);
       }
     }
-    if (temp !== undefined) {
-      const newTemp = typeof temp === 'object' ? Number(temp.doubleValue) : Number(temp);
-      tree2Temp.value = newTemp;
+    if (temp !== undefined && typeof temp === 'number' && !isNaN(temp)) {
+      tree2Temp.value = temp;
       
       // Add to temperature history
       tree2TempHistory.value.unshift({
-        temp: newTemp,
+        temp: temp,
         timestamp: new Date().toISOString()
       });
       
@@ -237,18 +235,25 @@ const useSensorData = () => {
           const latest = docs[0];
           const phValue = latest.estimated_ph;
           const timestamp = latest.timestamp;
-          
+          const temperatureC = latest.temperature_c;
+
           console.log('Extracted pH value:', phValue);
           console.log('Extracted timestamp:', timestamp);
-          
+          console.log('Extracted temperature_c:', temperatureC);
+
           if (phValue !== undefined) {
-            // Update both trees with the same pH value since it's from a single sensor
             updateTree1(undefined, phValue, undefined);
             updateTree2(undefined, phValue, undefined);
             
             console.log('Updated tree1PH:', tree1PH.value);
             console.log('Updated tree2PH:', tree2PH.value);
             
+            if (temperatureC !== undefined && typeof temperatureC === 'number' && !isNaN(temperatureC)) {
+              updateTree1(undefined, undefined, temperatureC);
+              updateTree2(undefined, undefined, temperatureC);
+              console.log('Updated tree1Temp and tree2Temp with temperature_c:', temperatureC);
+            }
+
             // Update last updated timestamps
             if (timestamp) {
               tree1LastUpdated.value = formatTimestamp(timestamp);
