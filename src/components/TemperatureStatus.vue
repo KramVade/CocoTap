@@ -47,7 +47,26 @@
           </div>
           <div class="stat-item">
             <span class="stat-label">Last Reading</span>
-            <span class="stat-value">{{ lastUpdated }}</span>
+            <span class="stat-value">{{ lastUpdated ? formatTimestamp(lastUpdated) : 'N/A' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Container Status -->
+      <div class="data-card">
+        <h2>Container Status</h2>
+        <div class="stats-grid">
+          <div class="stat-item">
+            <span class="stat-label">Current Level</span>
+            <span class="stat-value">
+              {{ (typeof containerReading === 'number' && !isNaN(containerReading)) ? containerReading + '%' : 'N/A' }}
+            </span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Status</span>
+            <span class="stat-value" :class="containerStatus.toLowerCase()">
+              {{ containerStatus }}
+            </span>
           </div>
         </div>
       </div>
@@ -103,20 +122,6 @@ import {
 export default {
   name: 'TemperatureStatus',
   props: {
-    temperature: {
-      type: Number,
-      required: false,
-      default: null
-    },
-    lastUpdated: {
-      type: String,
-      required: true
-    },
-    history: {
-      type: Array,
-      required: true,
-      default: () => []
-    },
     formatTimestamp: {
       type: Function,
       required: true
@@ -124,7 +129,13 @@ export default {
   },
   data() {
     return {
-      tempUnsubscribe: null
+      temperature: null,
+      lastUpdated: null,
+      tempUnsubscribe: null,
+      history: [],
+      containerReading: null,
+      containerUnsubscribe: null,
+      notificationShown: false
     }
   },
   computed: {
@@ -136,19 +147,98 @@ export default {
       if (currentTemp >= 25) return 'Optimal';
       if (currentTemp >= 20) return 'Cool';
       return 'Too Cold';
+    },
+    containerStatus() {
+      if (typeof this.containerReading !== 'number' || isNaN(this.containerReading)) return 'N/A';
+      if (this.containerReading >= 95) return 'Critical';
+      if (this.containerReading >= 80) return 'High';
+      if (this.containerReading >= 50) return 'Medium';
+      return 'Low';
+    }
+  },
+  watch: {
+    containerReading(newValue) {
+      if (newValue >= 95 && !this.notificationShown) {
+        this.showContainerNotification();
+        this.notificationShown = true;
+      } else if (newValue < 95) {
+        this.notificationShown = false;
+      }
     }
   },
   methods: {
-    fetchEstimatedTemperature() {
-      console.log('fetchEstimatedTemperature method is no longer needed as data is passed via props.');
+    showContainerNotification() {
+      // Using browser's native notification API
+      if ('Notification' in window) {
+        Notification.requestPermission().then(permission => {
+          if (permission === 'granted') {
+            new Notification('Container Alert', {
+              body: 'Container reading has reached 95%!',
+              icon: '/path/to/your/icon.png' // You can add your own icon
+            });
+          }
+        });
+      }
+    },
+    fetchContainerReading() {
+      const containerRef = collection(firestore, 'container_sensor');
+      const q = query(containerRef, orderBy('timestamp', 'desc'), limit(1));
+      this.containerUnsubscribe = onSnapshot(q, (querySnapshot) => {
+        const docs = querySnapshot.docs.map(doc => doc.data());
+        if (docs.length > 0) {
+          this.containerReading = docs[0].reading || null;
+        } else {
+          this.containerReading = null;
+        }
+      });
+    },
+    fetchTemperature() {
+      const sensorRef = collection(firestore, 'ph_sensor');
+      // Fetch the latest 100 readings for better hourly grouping
+      const q = query(sensorRef, orderBy('timestamp', 'desc'), limit(100));
+      this.tempUnsubscribe = onSnapshot(q, (querySnapshot) => {
+        const docs = querySnapshot.docs.map(doc => doc.data());
+        if (docs.length > 0) {
+          // Group by hour
+          const hourlyMap = {};
+          docs.forEach(d => {
+            if (!d.timestamp) return;
+            const date = new Date(d.timestamp);
+            // Use year-month-day-hour as the key
+            const hourKey = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}-${date.getHours()}`;
+            // Only keep the first reading for each hour
+            if (!hourlyMap[hourKey]) {
+              hourlyMap[hourKey] = {
+                temperature: d.temperature_c || d.temperature_celsius || null,
+                timestamp: d.timestamp
+              };
+            }
+          });
+          // Sort by timestamp ascending
+          const hourlyHistory = Object.values(hourlyMap).sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+          this.history = hourlyHistory;
+          // Use the latest for current value
+          const latest = hourlyHistory[hourlyHistory.length - 1];
+          this.temperature = latest ? latest.temperature : null;
+          this.lastUpdated = latest ? latest.timestamp : null;
+        } else {
+          this.temperature = null;
+          this.lastUpdated = null;
+          this.history = [];
+        }
+      });
     }
   },
   mounted() {
-    this.fetchEstimatedTemperature();
+    this.fetchTemperature();
+    this.fetchContainerReading();
   },
   beforeUnmount() {
     if (this.tempUnsubscribe) {
       this.tempUnsubscribe();
+    }
+    if (this.containerUnsubscribe) {
+      this.containerUnsubscribe();
     }
   }
 }
@@ -290,6 +380,26 @@ export default {
 .temperature-status.too-cold {
   color: #2980b9;
   background-color: rgba(41, 128, 185, 0.1);
+}
+
+.temperature-status.critical {
+  color: #c0392b;
+  background-color: rgba(192, 57, 43, 0.1);
+}
+
+.temperature-status.high {
+  color: #e67e22;
+  background-color: rgba(230, 126, 34, 0.1);
+}
+
+.temperature-status.medium {
+  color: #f1c40f;
+  background-color: rgba(241, 196, 15, 0.1);
+}
+
+.temperature-status.low {
+  color: #2ecc71;
+  background-color: rgba(46, 204, 113, 0.1);
 }
 
 .stats-grid {

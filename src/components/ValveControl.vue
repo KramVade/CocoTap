@@ -99,20 +99,35 @@ export default {
         }, { merge: true });
 
         this.valveUnsubscribe = onSnapshot(valveRef, (doc) => {
-          if (!doc.exists()) return;
+          if (!doc.exists()) {
+            console.log('No valve document exists');
+            return;
+          }
           
           const data = doc.data();
           const newTimestamp = data.fields?.lastUpdated?.timestampValue;
-
-          if (this.lastValveUpdate && newTimestamp < this.lastValveUpdate) return;
-          if (this.valveUpdateLock) return;
-
           const newState = data.fields?.valveState?.booleanValue ?? false;
           const newManualOverride = data.fields?.manualOverride?.booleanValue ?? false;
+
+          console.log('Valve update received:', {
+            newState,
+            newTimestamp,
+            currentState: this.isValveOpen,
+            lastUpdate: this.lastValveUpdate,
+            isLocked: this.valveUpdateLock
+          });
+
+          // Only skip update if we're currently processing a change
+          if (this.valveUpdateLock) {
+            console.log('Skipping update due to valve lock');
+            return;
+          }
 
           this.isValveOpen = newState;
           this.manualOverride = newManualOverride;
           this.lastValveUpdate = newTimestamp;
+        }, (error) => {
+          console.error('Error in valve snapshot listener:', error);
         });
       } catch (error) {
         console.error('Error initializing valve control:', error);

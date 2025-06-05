@@ -87,14 +87,6 @@
                 <span class="nav-icon">🌴</span>
                 Tree 1
               </div>
-              <div 
-                class="nav-item" 
-                :class="{ active: currentView === 'tree2-container' }"
-                @click="selectView('tree2-container')"
-              >
-                <span class="nav-icon">🌴</span>
-                Tree 2
-              </div>
             </div>
           </div>
 
@@ -118,14 +110,6 @@
                 <span class="nav-icon">🍾</span>
                 Bottle 1
               </div>
-              <div 
-                class="nav-item" 
-                :class="{ active: currentView === 'tree2-ph' }"
-                @click="currentView = 'tree2-ph'"
-              >
-                <span class="nav-icon">🍾</span>
-                Bottle 2
-              </div>
             </div>
           </div>
 
@@ -148,14 +132,6 @@
               >
                 <span class="nav-icon">🍾</span>
                 Bottle 1
-              </div>
-              <div 
-                class="nav-item" 
-                :class="{ active: currentView === 'tree2-temp' }"
-                @click="currentView = 'tree2-temp'"
-              >
-                <span class="nav-icon">🍾</span>
-                Bottle 2
               </div>
             </div>
           </div>
@@ -200,37 +176,6 @@
             </div>
           </div>
 
-          <!-- Tree 2 Container Status -->
-          <div v-if="currentView === 'tree2-container'" class="view-content">
-            <div class="view-header">
-              <h2>Tree 2 - Container Status</h2>
-            </div>
-            <div class="content-grid">
-              <ContainerStatus
-                :level="tree2Level"
-                :container-capacity="containerCapacity"
-                :last-updated="tree2LastUpdated"
-                :history="tree2History"
-                :show-valve-control="false"
-              />
-            </div>
-          </div>
-
-          <!-- Tree 2 pH Status -->
-          <div v-if="currentView === 'tree2-ph'" class="view-content">
-            <div class="view-header">
-              <h2>Tree 2 - pH Status</h2>
-            </div>
-            <div class="content-grid">
-              <PHStatus
-                :ph="tree2PH"
-                :last-updated="tree2LastUpdated"
-                :history="tree2PHHistory"
-                :format-timestamp="formatTimestamp"
-              />
-            </div>
-          </div>
-
           <!-- Temperature View for Bottle 1 -->
           <div v-if="currentView === 'tree1-temp'" class="view-content">
             <div class="view-header">
@@ -241,21 +186,6 @@
                 :temperature="tree1Temp"
                 :last-updated="tree1LastUpdated"
                 :history="tree1TempHistory"
-                :format-timestamp="formatTimestamp"
-              />
-            </div>
-          </div>
-
-          <!-- Temperature View for Bottle 2 -->
-          <div v-if="currentView === 'tree2-temp'" class="view-content">
-            <div class="header">
-              <h1>Bottle 2 - Temperature</h1>
-            </div>
-            <div class="content-grid">
-              <TemperatureStatus
-                :temperature="tree2Temp"
-                :last-updated="tree2LastUpdated"
-                :history="tree2TempHistory"
                 :format-timestamp="formatTimestamp"
               />
             </div>
